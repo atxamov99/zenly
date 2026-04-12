@@ -1,0 +1,57 @@
+name: blink
+description: Real-time location sharing app — Zenly clone
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^2.24.0
+  firebase_auth: ^4.15.0
+  cloud_firestore: ^4.13.0
+  firebase_messaging: ^14.7.0
+  firebase_storage: ^11.5.0
+  google_sign_in: ^6.2.1
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+
+  # Navigation
+  go_router: ^13.2.0
+
+  # Maps & Location
+  google_maps_flutter: ^2.5.3
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  background_locator_2: ^2.0.6
+
+  # Device
+  battery_plus: ^5.0.1
+  permission_handler: ^11.3.0
+
+  # UI & Utils
+  cached_network_image: ^3.3.1
+  image_picker: ^1.0.7
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+  intl: ^0.19.0
+  rxdart: ^0.27.7
+  http: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  mocktail: ^1.0.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/map_styles/
