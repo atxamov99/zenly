@@ -91,6 +91,8 @@ Future<void> toggleGhostFromFriend(String uid, String friendUid, bool hide) asyn
 
 ## 📱 UI — Ghost Mode Toggle
 
+  Liquid Glass ios-26
+
 ### Quick Toggle FAB on Map
 
 ```dart
