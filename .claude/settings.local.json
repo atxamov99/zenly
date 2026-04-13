@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd.exe /c \"where flutter\")",
+      "Bash(echo \"exit: $?\")",
+      "Read(//c/Users/user/AppData/Local/flutter/**)",
+      "Read(//c/flutter/**)",
+      "Read(//c/Users/user/**)",
+      "Bash(cmd.exe /c \"flutter analyze lib/core/ 2>&1\")",
+      "Bash(powershell.exe:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(\"/c/Users/user/.vscode/flutter/bin/flutter\" analyze:*)",
+      "Bash(/c/Users/user/.vscode/flutter/bin/flutter test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)"
+    ]
+  }
+}
