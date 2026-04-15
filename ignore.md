@@ -53,7 +53,36 @@ Har bir fayl yakunlangandan so'ng shu yerga yoziladi.
 ### Qolgan (manual) qadamlar
 | Qadam | Holat |
 |-------|-------|
-| `flutterfire configure` ishlatib `firebase_options.dart` yaratish | ⏳ Siz qilishingiz kerak |
+| `flutterfire configure` ishlatib `firebase_options.dart` yaratish | ✅ Tugallandi |
+
+---
+
+## Phase 1.5: Backend Integration (Firebase → Custom Backend)
+
+**Maqsad:** Firebase Auth + Firestore ni Node.js/Express/MongoDB backend bilan almashtirish.
+
+**Backend:** `backend/` papkada, Node.js + Express + MongoDB + Socket.IO, port 4000.
+
+**Nima o'zgaradi:**
+- Firebase Auth o'chirilib, JWT (email+parol, Google Sign-In) ishlatiladi
+- Firestore o'chirilib, REST API ishlatiladi
+- Socket.IO real-time location uchun qo'shiladi
+- `flutter_secure_storage` JWT tokenlarni saqlash uchun
+- `google_sign_in` → backend `/api/auth/google` endpoint bilan ulash
+
+### Yakunlangan fayllar
+| Fayl | Holat |
+|------|-------|
+| — | — |
+
+### Qolgan fayllar
+| Fayl | Holat |
+|------|-------|
+| Design doc yozish | ⏳ |
+| Implementation plan yozish | ⏳ |
+| Backend: `POST /api/auth/google` endpoint | ⏳ |
+| Flutter: datasources, repositories, providers yangilash | ⏳ |
+| Flutter: pubspec.yaml (firebase o'chirish, http/socket qo'shish) | ⏳ |
 
 ---
 
