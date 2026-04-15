@@ -1,0 +1,793 @@
+{
+  "info": {
+    "name": "Blink Clone Backend",
+    "_postman_id": "3fd5553b-6ec1-4873-b7b4-cbffdd30f9e8",
+    "description": "Postman collection for testing auth, friends and live location APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "friendId",
+      "value": ""
+    },
+    {
+      "key": "requestId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alex\",\n  \"email\": \"alex@example.com\",\n  \"password\": \"12345678\",\n  \"displayName\": \"Alex\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"alex@example.com\",\n  \"password\": \"12345678\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Refresh",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"REFRESH_TOKEN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/refresh",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "refresh"]
+        }
+      }
+    },
+    {
+      "name": "Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/me",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "me"]
+        }
+      }
+    },
+    {
+      "name": "Sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/sessions",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "sessions"]
+        }
+      }
+    },
+    {
+      "name": "Change Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"12345678\",\n  \"newPassword\": \"123456789\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/change-password",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "change-password"]
+        }
+      }
+    },
+    {
+      "name": "Forgot Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"alex@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/forgot-password",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "forgot-password"]
+        }
+      }
+    },
+    {
+      "name": "Reset Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"RESET_TOKEN\",\n  \"newPassword\": \"123456789\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/reset-password",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "reset-password"]
+        }
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "logout"]
+        }
+      }
+    },
+    {
+      "name": "Logout All",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/logout-all",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "logout-all"]
+        }
+      }
+    },
+    {
+      "name": "Update Profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alex\",\n  \"email\": \"alex@example.com\",\n  \"displayName\": \"Alex\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profile"]
+        }
+      }
+    },
+    {
+      "name": "Upload Avatar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "avatar",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/avatar",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profile", "avatar"]
+        }
+      }
+    },
+    {
+      "name": "Update Privacy",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"locationVisibility\": \"circles\",\n  \"lastSeenVisibility\": \"friends\",\n  \"ghostMode\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/privacy",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "profile", "privacy"]
+        }
+      }
+    },
+    {
+      "name": "Blocked Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/blocks",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "blocks"]
+        }
+      }
+    },
+    {
+      "name": "Block User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/blocks/{{friendId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "blocks", "{{friendId}}"]
+        }
+      }
+    },
+    {
+      "name": "Unblock User",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/blocks/{{friendId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "blocks", "{{friendId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create Circle",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Close Friends\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/circles",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "circles"]
+        }
+      }
+    },
+    {
+      "name": "Search Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/search?q=alex",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "alex"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Friends List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/friends",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends"]
+        }
+      }
+    },
+    {
+      "name": "Friend Requests",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/requests",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "requests"]
+        }
+      }
+    },
+    {
+      "name": "Send Friend Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alex\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/request",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "request"]
+        }
+      }
+    },
+    {
+      "name": "Respond To Request",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"accepted\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/{{requestId}}/respond",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "{{requestId}}", "respond"]
+        }
+      }
+    },
+    {
+      "name": "Cancel Outgoing Request",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/request/{{requestId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "request", "{{requestId}}"]
+        }
+      }
+    },
+    {
+      "name": "Remove Friend",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/friends/{{friendId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "friends", "{{friendId}}"]
+        }
+      }
+    },
+    {
+      "name": "Enable Location Sharing",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"durationMinutes\": 60\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/location/share/{{friendId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "share", "{{friendId}}"]
+        }
+      }
+    },
+    {
+      "name": "Disable Location Sharing",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/location/share/{{friendId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "share", "{{friendId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Location",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"lat\": 41.311081,\n  \"lng\": 69.240562,\n  \"accuracy\": 15\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/location/update",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "update"]
+        }
+      }
+    },
+    {
+      "name": "Visible Friends",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/location/visible-friends",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "visible-friends"]
+        }
+      }
+    },
+    {
+      "name": "Location History",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/location/history",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "history"]
+        }
+      }
+    },
+    {
+      "name": "Create Geozone",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Home\",\n  \"kind\": \"home\",\n  \"lat\": 41.311081,\n  \"lng\": 69.240562,\n  \"radiusMeters\": 150,\n  \"notifyViewerIds\": [\"{{friendId}}\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/geozones",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "geozones"]
+        }
+      }
+    },
+    {
+      "name": "Create Invite",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"expiresInHours\": 24,\n  \"maxUses\": 3\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/invites",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "invites"]
+        }
+      }
+    },
+    {
+      "name": "Invites List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/invites",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "invites"]
+        }
+      }
+    },
+    {
+      "name": "Notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/notifications",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "notifications"]
+        }
+      }
+    },
+    {
+      "name": "Read All Notifications",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/notifications/read-all",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "notifications", "read-all"]
+        }
+      }
+    },
+    {
+      "name": "Geozones List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/geozones",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "geozones"]
+        }
+      }
+    },
+    {
+      "name": "Share Settings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/location/share-settings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "location", "share-settings"]
+        }
+      }
+    },
+    {
+      "name": "Save Push Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"device-token\",\n  \"platform\": \"android\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/push/tokens",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "push", "tokens"]
+        }
+      }
+    }
+  ]
+}
