@@ -1,5 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const { OAuth2Client } = require("google-auth-library");
+
+const googleClient = new OAuth2Client();
 
 const User = require("../models/User");
 const Session = require("../models/Session");
@@ -131,6 +134,63 @@ router.post("/refresh", authLimiter, async (req, res, next) => {
       refreshToken: newRefreshToken,
       sessionId: session._id,
       user: serializeUser(session.user)
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/google", authLimiter, async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+
+    if (typeof idToken !== "string" || !idToken) {
+      return res.status(400).json({ message: "idToken is required" });
+    }
+
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({ idToken });
+      payload = ticket.getPayload();
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid Google idToken" });
+    }
+
+    if (!payload || !payload.email) {
+      return res.status(401).json({ message: "Google account has no email" });
+    }
+
+    const normalizedEmail = payload.email.toLowerCase();
+
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      let username = (payload.email.split("@")[0] || "user").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20);
+      if (username.length < 3) username = `user${Date.now()}`;
+
+      let unique = username;
+      let counter = 1;
+      while (await User.findOne({ username: unique })) {
+        unique = `${username}${counter}`;
+        counter++;
+      }
+
+      user = await User.create({
+        username: unique,
+        email: normalizedEmail,
+        passwordHash: await bcrypt.hash(generateOpaqueToken(), 10),
+        displayName: payload.name || unique,
+        avatarUrl: payload.picture || null
+      });
+    }
+
+    const { accessToken, refreshToken, session } = await createSession(user, req);
+
+    res.json({
+      accessToken,
+      refreshToken,
+      sessionId: session._id,
+      user: serializeUser(user)
     });
   } catch (error) {
     next(error);
