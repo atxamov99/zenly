@@ -10,12 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase
-  firebase_core: ^2.24.0
-  firebase_auth: ^4.15.0
-  cloud_firestore: ^4.13.0
-  firebase_messaging: ^14.7.0
-  firebase_storage: ^11.5.0
+  # Networking
+  dio: ^5.4.0
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+
+  # Real-time
+  socket_io_client: ^2.0.3+1
+
+  # Auth
   google_sign_in: ^6.2.1
 
   # State Management
@@ -28,7 +32,6 @@ dependencies:
   google_maps_flutter: ^2.5.3
   geolocator: ^10.1.0
   geocoding: ^2.1.1
-  background_locator_2: ^2.0.6
 
   # Device
   battery_plus: ^5.0.1
