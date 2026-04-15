@@ -1,34 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/datasources/remote/firebase_auth_datasource.dart';
+import '../../data/datasources/local/token_storage.dart';
+import '../../data/datasources/remote/api_auth_datasource.dart';
+import '../../data/datasources/remote/api_client.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/auth/verify_phone_usecase.dart';
-import '../../domain/usecases/auth/verify_otp_usecase.dart';
 import '../../domain/usecases/auth/sign_in_email_usecase.dart';
 import '../../domain/usecases/auth/sign_in_google_usecase.dart';
 import '../../domain/usecases/auth/sign_out_usecase.dart';
 
+// ── Local Storage ───────────────────────────────────────────
+
+final tokenStorageProvider = Provider<TokenStorage>((_) {
+  return TokenStorage();
+});
+
+// ── HTTP Client ─────────────────────────────────────────────
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(ref.watch(tokenStorageProvider));
+});
+
 // ── Datasource ──────────────────────────────────────────────
 
-final firebaseAuthDatasourceProvider = Provider<FirebaseAuthDatasource>((_) {
-  return FirebaseAuthDatasource();
+final apiAuthDatasourceProvider = Provider<ApiAuthDatasource>((ref) {
+  return ApiAuthDatasource(
+    client: ref.watch(apiClientProvider),
+    tokenStorage: ref.watch(tokenStorageProvider),
+  );
 });
 
 // ── Repository ──────────────────────────────────────────────
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(ref.watch(firebaseAuthDatasourceProvider));
+  return AuthRepositoryImpl(ref.watch(apiAuthDatasourceProvider));
 });
 
 // ── Use Cases ───────────────────────────────────────────────
-
-final verifyPhoneUseCaseProvider = Provider((ref) {
-  return VerifyPhoneUseCase(ref.watch(authRepositoryProvider));
-});
-
-final verifyOtpUseCaseProvider = Provider((ref) {
-  return VerifyOtpUseCase(ref.watch(authRepositoryProvider));
-});
 
 final signInEmailUseCaseProvider = Provider((ref) {
   return SignInEmailUseCase(ref.watch(authRepositoryProvider));
@@ -48,17 +55,48 @@ final signOutUseCaseProvider = Provider((ref) {
 
 // ── Auth State ──────────────────────────────────────────────
 
-/// Emits current uid or null. Used for routing and auth checks.
-final authStateProvider = StreamProvider<String?>((ref) {
-  return ref.watch(authRepositoryProvider).authStateChanges;
-});
+class AuthNotifier extends AsyncNotifier<String?> {
+  @override
+  Future<String?> build() async {
+    final repo = ref.watch(authRepositoryProvider);
+    final hasSession = await repo.hasValidSession();
+    if (!hasSession) return null;
+    return repo.getStoredUid();
+  }
 
-/// Convenience: true if user is signed in.
+  Future<void> setAuthenticated(String uid) async {
+    state = AsyncData(uid);
+  }
+
+  Future<void> signOut() async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(authRepositoryProvider);
+      final hasSession = await repo.hasValidSession();
+      if (!hasSession) return null;
+      return repo.getStoredUid();
+    });
+  }
+}
+
+final authStateProvider = AsyncNotifierProvider<AuthNotifier, String?>(
+  AuthNotifier.new,
+);
+
 final isAuthenticatedProvider = Provider<bool>((ref) {
   return ref.watch(authStateProvider).value != null;
 });
 
-/// Current uid. Throws if not authenticated.
 final currentUidProvider = Provider<String>((ref) {
   final uid = ref.watch(authStateProvider).value;
   if (uid == null) throw StateError('No authenticated user');

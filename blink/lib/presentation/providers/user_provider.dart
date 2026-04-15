@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/datasources/remote/firestore_user_datasource.dart';
+import '../../data/datasources/remote/api_user_datasource.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -8,14 +8,14 @@ import 'auth_provider.dart';
 
 // ── Datasource ──────────────────────────────────────────────
 
-final firestoreUserDatasourceProvider = Provider<FirestoreUserDatasource>((_) {
-  return FirestoreUserDatasource();
+final apiUserDatasourceProvider = Provider<ApiUserDatasource>((ref) {
+  return ApiUserDatasource(ref.watch(apiClientProvider));
 });
 
 // ── Repository ──────────────────────────────────────────────
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  return UserRepositoryImpl(ref.watch(firestoreUserDatasourceProvider));
+  return UserRepositoryImpl(ref.watch(apiUserDatasourceProvider));
 });
 
 // ── Use Cases ───────────────────────────────────────────────
@@ -24,29 +24,26 @@ final createUserProfileUseCaseProvider = Provider((ref) {
   return CreateUserProfileUseCase(ref.watch(userRepositoryProvider));
 });
 
-// ── Current User Stream ─────────────────────────────────────
+// ── Current User ────────────────────────────────────────────
 
-final currentUserProvider = StreamProvider<UserEntity?>((ref) {
-  final authState = ref.watch(authStateProvider);
-
-  return authState.when(
-    data: (uid) {
-      if (uid == null) return Stream.value(null);
-      return ref.watch(userRepositoryProvider).watchUser(uid);
-    },
-    loading: () => Stream.value(null),
-    error: (_, __) => Stream.value(null),
-  );
+final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
+  final auth = ref.watch(authStateProvider);
+  final uid = auth.value;
+  if (uid == null) return null;
+  try {
+    return await ref.watch(userRepositoryProvider).getUserById(uid);
+  } catch (_) {
+    return null;
+  }
 });
 
-/// Check if user profile exists in Firestore (for profile setup redirect).
+/// Backend tomondan profil yaratilganligini tekshiradi.
 final userProfileExistsProvider = FutureProvider<bool>((ref) async {
   final uid = ref.watch(authStateProvider).value;
   if (uid == null) return false;
-
   try {
-    await ref.watch(userRepositoryProvider).getUserById(uid);
-    return true;
+    final user = await ref.watch(userRepositoryProvider).getUserById(uid);
+    return user.username.isNotEmpty && user.displayName.isNotEmpty;
   } catch (_) {
     return false;
   }

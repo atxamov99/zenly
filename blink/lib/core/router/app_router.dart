@@ -2,19 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../presentation/screens/auth/login_screen.dart';
-import '../../presentation/screens/auth/otp_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/onboarding/onboarding_screen.dart';
 import '../../presentation/screens/profile_setup/profile_setup_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 
-// Route names
 class AppRoutes {
   static const splash = '/';
   static const onboarding = '/onboarding';
   static const login = '/login';
-  static const otp = '/otp';
   static const register = '/register';
   static const profileSetup = '/profile-setup';
   static const home = '/home';
@@ -31,12 +28,10 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (isLoading) return null;
 
-      // Not authenticated → send to login
       if (!isAuth && state.matchedLocation == AppRoutes.home) {
         return AppRoutes.login;
       }
 
-      // Authenticated at login → check profile
       if (isAuth && state.matchedLocation == AppRoutes.login) {
         return AppRoutes.home;
       }
@@ -55,16 +50,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (_, __) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.otp,
-        builder: (_, state) {
-          final extra = state.extra as Map<String, String>;
-          return OtpScreen(
-            verificationId: extra['verificationId']!,
-            phoneNumber: extra['phoneNumber']!,
-          );
-        },
       ),
       GoRoute(
         path: AppRoutes.register,
