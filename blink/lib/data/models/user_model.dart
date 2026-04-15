@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/user_entity.dart';
 
 class UserModel {
@@ -40,53 +39,40 @@ class UserModel {
     this.createdAt,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  /// Backend response: `{ id, username, email, displayName, avatarUrl, privacy, presence }`
+  factory UserModel.fromApi(Map<String, dynamic> json) {
+    final privacy = (json['privacy'] as Map<String, dynamic>?) ?? const {};
+    final presence = (json['presence'] as Map<String, dynamic>?) ?? const {};
+
     return UserModel(
-      uid: json['uid'] as String,
+      uid: (json['id'] ?? json['_id'] ?? '').toString(),
       displayName: json['displayName'] as String? ?? '',
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
-      photoUrl: json['photoUrl'] as String? ?? '',
-      emoji: json['emoji'] as String? ?? '',
-      statusMessage: json['statusMessage'] as String? ?? '',
-      isOnline: json['isOnline'] as bool? ?? false,
-      lastSeen: json['lastSeen'] is Timestamp
-          ? (json['lastSeen'] as Timestamp).toDate()
+      photoUrl: json['avatarUrl'] as String? ?? '',
+      emoji: '',
+      statusMessage: '',
+      isOnline: presence['isOnline'] as bool? ?? false,
+      lastSeen: presence['lastSeenAt'] != null
+          ? DateTime.tryParse(presence['lastSeenAt'].toString())
           : null,
-      ghostMode: json['ghostMode'] as bool? ?? false,
-      ghostFromList: List<String>.from(json['ghostFromList'] ?? []),
-      batteryPercent: json['batteryPercent'] as int? ?? 100,
-      isCharging: json['isCharging'] as bool? ?? false,
-      locationSharingMode: json['locationSharingMode'] as String? ?? 'precise',
-      fcmToken: json['fcmToken'] as String?,
-      createdAt: json['createdAt'] is Timestamp
-          ? (json['createdAt'] as Timestamp).toDate()
+      ghostMode: privacy['ghostMode'] as bool? ?? false,
+      ghostFromList: const [],
+      batteryPercent: 100,
+      isCharging: false,
+      locationSharingMode: privacy['locationVisibility'] as String? ?? 'friends',
+      fcmToken: null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
     );
   }
 
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    return UserModel.fromJson(doc.data() as Map<String, dynamic>);
-  }
-
-  Map<String, dynamic> toJson() => {
-        'uid': uid,
+  Map<String, dynamic> toApi() => {
         'displayName': displayName,
         'username': username,
-        'email': email,
-        'phone': phone,
-        'photoUrl': photoUrl,
-        'emoji': emoji,
-        'statusMessage': statusMessage,
-        'isOnline': isOnline,
-        'lastSeen': lastSeen != null ? Timestamp.fromDate(lastSeen!) : null,
-        'ghostMode': ghostMode,
-        'ghostFromList': ghostFromList,
-        'batteryPercent': batteryPercent,
-        'isCharging': isCharging,
-        'locationSharingMode': locationSharingMode,
-        'fcmToken': fcmToken,
+        'avatarUrl': photoUrl,
       };
 
   UserEntity toEntity() => UserEntity(

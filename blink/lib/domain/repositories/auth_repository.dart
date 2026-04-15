@@ -1,34 +1,27 @@
 abstract class AuthRepository {
-  /// Sends OTP SMS to phone number. Returns verificationId on success.
-  Future<String> verifyPhoneNumber(String phoneNumber);
-
-  /// Signs in with phone credential. Returns firebase uid.
-  Future<String> verifyOtp({
-    required String verificationId,
-    required String smsCode,
-  });
-
-  /// Signs in with email and password. Returns firebase uid.
+  /// Email + parol bilan tizimga kiradi. Backend uid ni qaytaradi.
   Future<String> signInWithEmail({
     required String email,
     required String password,
   });
 
-  /// Registers with email and password. Returns firebase uid.
+  /// Yangi foydalanuvchini ro'yxatdan o'tkazadi. Backend uid ni qaytaradi.
   Future<String> registerWithEmail({
     required String email,
     required String password,
+    required String username,
+    required String displayName,
   });
 
-  /// Signs in with Google. Returns firebase uid.
+  /// Google Sign-In orqali kiradi. Backend uid ni qaytaradi.
   Future<String> signInWithGoogle();
 
-  /// Signs out from all providers.
+  /// Tizimdan chiqadi va saqlangan tokenlarni tozalaydi.
   Future<void> signOut();
 
-  /// Returns current firebase uid or null.
-  String? get currentUid;
+  /// Saqlangan uid ni qaytaradi (lokal storagedan), aks holda null.
+  Future<String?> getStoredUid();
 
-  /// Stream of auth state changes. Emits uid or null.
-  Stream<String?> get authStateChanges;
+  /// Lokal storage da token bormi.
+  Future<bool> hasValidSession();
 }
