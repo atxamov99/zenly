@@ -1,30 +1,10 @@
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/remote/firebase_auth_datasource.dart';
+import '../datasources/remote/api_auth_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final FirebaseAuthDatasource _datasource;
+  final ApiAuthDatasource _datasource;
 
   AuthRepositoryImpl(this._datasource);
-
-  @override
-  String? get currentUid => _datasource.currentUid;
-
-  @override
-  Stream<String?> get authStateChanges => _datasource.authStateChanges;
-
-  @override
-  Future<String> verifyPhoneNumber(String phoneNumber) =>
-      _datasource.verifyPhoneNumber(phoneNumber);
-
-  @override
-  Future<String> verifyOtp({
-    required String verificationId,
-    required String smsCode,
-  }) =>
-      _datasource.verifyOtp(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
 
   @override
   Future<String> signInWithEmail({
@@ -37,12 +17,25 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<String> registerWithEmail({
     required String email,
     required String password,
+    required String username,
+    required String displayName,
   }) =>
-      _datasource.registerWithEmail(email: email, password: password);
+      _datasource.registerWithEmail(
+        email: email,
+        password: password,
+        username: username,
+        displayName: displayName,
+      );
 
   @override
   Future<String> signInWithGoogle() => _datasource.signInWithGoogle();
 
   @override
   Future<void> signOut() => _datasource.signOut();
+
+  @override
+  Future<String?> getStoredUid() => _datasource.getStoredUid();
+
+  @override
+  Future<bool> hasValidSession() => _datasource.hasValidSession();
 }
