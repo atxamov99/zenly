@@ -73,16 +73,33 @@ Har bir fayl yakunlangandan so'ng shu yerga yoziladi.
 ### Yakunlangan fayllar
 | Fayl | Holat |
 |------|-------|
-| — | — |
-
-### Qolgan fayllar
-| Fayl | Holat |
-|------|-------|
-| Design doc yozish | ⏳ |
-| Implementation plan yozish | ⏳ |
-| Backend: `POST /api/auth/google` endpoint | ⏳ |
-| Flutter: datasources, repositories, providers yangilash | ⏳ |
-| Flutter: pubspec.yaml (firebase o'chirish, http/socket qo'shish) | ⏳ |
+| `docs/superpowers/specs/2026-04-15-backend-integration-design.md` | ✅ Design doc |
+| `docs/superpowers/plans/2026-04-15-blink-phase1.5-backend-integration.md` | ✅ Plan |
+| `backend/src/routes/auth.routes.js` | ✅ Task 1 — `POST /api/auth/google` qo'shildi |
+| `backend/package.json` | ✅ Task 1 — `google-auth-library` qo'shildi |
+| `blink/pubspec.yaml` | ✅ Task 2 — Firebase o'chirildi, dio/secure_storage/socket qo'shildi |
+| `blink/lib/core/constants/api_constants.dart` | ✅ Task 3 — backend URL'lar |
+| `blink/lib/data/datasources/local/token_storage.dart` | ✅ Task 4 — JWT secure storage |
+| `blink/lib/data/datasources/remote/api_client.dart` | ✅ Task 5 — Dio + refresh interceptor |
+| `blink/lib/data/models/user_model.dart` | ✅ Task 6 — `fromApi` factory, Firestore o'chdi |
+| `blink/lib/domain/repositories/auth_repository.dart` | ✅ Task 7 — phone OTP olib tashlandi |
+| `blink/lib/domain/usecases/auth/sign_in_email_usecase.dart` | ✅ Task 8 — RegisterUseCase yangilandi |
+| `blink/lib/data/datasources/remote/api_auth_datasource.dart` | ✅ Task 9 — yangi datasource |
+| `blink/lib/data/datasources/remote/api_user_datasource.dart` | ✅ Task 10 — profile/avatar |
+| `blink/lib/data/repositories/auth_repository_impl.dart` | ✅ Task 11 — API datasource |
+| `blink/lib/data/repositories/user_repository_impl.dart` | ✅ Task 12 — API datasource |
+| `blink/lib/presentation/providers/auth_provider.dart` | ✅ Task 13 — AsyncNotifier + API providers |
+| `blink/lib/presentation/providers/user_provider.dart` | ✅ Task 14 — FutureProvider |
+| `blink/lib/core/router/app_router.dart` | ✅ Task 15 — `/otp` o'chdi |
+| `blink/lib/presentation/screens/auth/login_screen.dart` | ✅ Task 16 — email + Google |
+| `blink/lib/presentation/screens/auth/register_screen.dart` | ✅ Task 17 — username + displayName |
+| `blink/lib/presentation/screens/profile_setup/profile_setup_screen.dart` | ✅ Task 18 — ApiUserDatasource |
+| `blink/lib/main.dart` | ✅ Task 19 — Firebase init o'chdi |
+| **O'chirilgan fayllar** | ✅ Task 20 |
+| `firebase_options.dart`, `firebase_auth_datasource.dart`, `firestore_user_datasource.dart` | 🗑️ |
+| `otp_screen.dart`, `verify_phone_usecase.dart`, `verify_otp_usecase.dart` | 🗑️ |
+| `verify_otp_usecase_test.dart`, `widget_test.dart` | 🗑️ |
+| **`flutter analyze`** | ✅ Task 21 — No issues found |
 
 ---
 

@@ -18,6 +18,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _error;
@@ -26,6 +28,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _usernameController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
@@ -38,11 +42,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     try {
-      await ref.read(registerEmailUseCaseProvider).call(
+      final uid = await ref.read(registerEmailUseCaseProvider).call(
             email: _emailController.text.trim(),
             password: _passwordController.text,
+            username: _usernameController.text.trim(),
+            displayName: _displayNameController.text.trim(),
           );
-
+      await ref.read(authStateProvider.notifier).setAuthenticated(uid);
       if (!mounted) return;
       final profileExists = await ref.read(userProfileExistsProvider.future);
       if (!mounted) return;
@@ -60,11 +66,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(title: const Text('Create Account')),
       body: Form(
         key: _formKey,
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.md),
           child: Column(
             children: [
               const SizedBox(height: AppSizes.lg),
+              AppTextField(
+                hint: 'Display name',
+                controller: _displayNameController,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+              ),
+              const SizedBox(height: AppSizes.md),
+              AppTextField(
+                hint: 'Username (e.g. abdulaziz)',
+                controller: _usernameController,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Required';
+                  if (v.length < 3) return 'At least 3 characters';
+                  if (!RegExp(r'^[a-z0-9_]+$').hasMatch(v)) {
+                    return 'Lowercase letters, numbers, underscores only';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: AppSizes.md),
               AppTextField(
                 hint: 'Email',
                 controller: _emailController,

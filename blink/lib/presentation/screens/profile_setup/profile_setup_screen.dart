@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,8 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/router/app_router.dart';
-import '../../../domain/entities/user_entity.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
@@ -42,13 +38,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     if (picked != null) setState(() => _avatar = File(picked.path));
   }
 
-  Future<String?> _uploadAvatar(String uid) async {
-    if (_avatar == null) return null;
-    final ref = FirebaseStorage.instance.ref('avatars/$uid/profile.jpg');
-    await ref.putFile(_avatar!);
-    return await ref.getDownloadURL();
-  }
-
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -58,34 +47,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     });
 
     try {
-      final uid = ref.read(currentUidProvider);
-      final isAvailable = await ref
-          .read(userRepositoryProvider)
-          .isUsernameAvailable(_usernameController.text.trim());
-
-      if (!isAvailable) {
-        setState(() => _error = 'Username already taken');
-        return;
+      final datasource = ref.read(apiUserDatasourceProvider);
+      await datasource.updateProfile(
+        displayName: _nameController.text.trim(),
+        username: _usernameController.text.trim(),
+      );
+      if (_avatar != null) {
+        await datasource.uploadAvatar(_avatar!);
       }
-
-      final photoUrl = await _uploadAvatar(uid) ?? '';
-      final firebaseUser = FirebaseAuth.instance.currentUser!;
-
-      await ref.read(createUserProfileUseCaseProvider).call(
-            UserEntity(
-              uid: uid,
-              displayName: _nameController.text.trim(),
-              username: _usernameController.text.trim(),
-              email: firebaseUser.email ?? '',
-              phone: firebaseUser.phoneNumber ?? '',
-              photoUrl: photoUrl,
-              isOnline: true,
-              ghostMode: false,
-              batteryPercent: 100,
-              isCharging: false,
-              locationSharingMode: 'precise',
-            ),
-          );
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(userProfileExistsProvider);
 
       if (!mounted) return;
       context.go(AppRoutes.home);
@@ -112,7 +83,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: AppSizes.xl),
-                // Avatar picker
                 GestureDetector(
                   onTap: _pickAvatar,
                   child: CircleAvatar(
