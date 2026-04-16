@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = 'http://10.0.2.2:4000/api';
-  static const String socketUrl = 'http://10.0.2.2:4000';
+  static const String baseUrl = 'https://aphotic-verbally-nikia.ngrok-free.dev/api';
+  static const String socketUrl = 'https://aphotic-verbally-nikia.ngrok-free.dev';
 
   // Auth
   static const String register = '/auth/register';
@@ -13,4 +13,10 @@ class ApiConstants {
   // Profile
   static const String profile = '/profile';
   static const String avatar = '/profile/avatar';
+
+  // Location
+  static const String locationUpdate = '/location/update';
+  static const String visibleFriends = '/location/visible-friends';
+  static String shareLocation(String friendId) => '/location/share/$friendId';
+  static String unshareLocation(String friendId) => '/location/share/$friendId';
 }
