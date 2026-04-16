@@ -4,6 +4,7 @@ import '../../presentation/providers/auth_provider.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
+import '../../presentation/screens/map/map_screen.dart';
 import '../../presentation/screens/onboarding/onboarding_screen.dart';
 import '../../presentation/screens/profile_setup/profile_setup_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const register = '/register';
   static const profileSetup = '/profile-setup';
   static const home = '/home';
+  static const map = '/map';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -28,12 +30,20 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (isLoading) return null;
 
+      if (!isAuth && state.matchedLocation == AppRoutes.map) {
+        return AppRoutes.login;
+      }
+
       if (!isAuth && state.matchedLocation == AppRoutes.home) {
         return AppRoutes.login;
       }
 
       if (isAuth && state.matchedLocation == AppRoutes.login) {
-        return AppRoutes.home;
+        return AppRoutes.map;
+      }
+
+      if (isAuth && state.matchedLocation == AppRoutes.home) {
+        return AppRoutes.map;
       }
 
       return null;
@@ -62,6 +72,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         builder: (_, __) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.map,
+        builder: (_, __) => const MapScreen(),
       ),
     ],
   );
