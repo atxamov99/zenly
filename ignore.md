@@ -103,11 +103,49 @@ Har bir fayl yakunlangandan so'ng shu yerga yoziladi.
 
 ---
 
-## Phase 2: Location + Map
+## Phase 2A: Location + Map
+
+**Maqsad:** GPS background ga ham ishlaydigan foreground service orqali har 10s da backendga yuboradi, OpenStreetMap xaritasida o'z + do'stlar joylashuvini real-time ko'rsatadi.
+
+**Texnologiyalar:** `flutter_map` (OpenStreetMap, bepul), `flutter_foreground_task` 8.x, `geolocator`, `socket_io_client`.
+
+### Yakunlangan fayllar
+| Fayl | Holat |
+|------|-------|
+| `docs/superpowers/specs/2026-04-16-phase2a-location-map-design.md` | ✅ Spec |
+| `docs/superpowers/plans/2026-04-16-phase2a-location-map.md` | ✅ Plan |
+| `blink/pubspec.yaml` | ✅ Task 1 — flutter_map, latlong2, foreground_task |
+| `blink/lib/core/constants/api_constants.dart` | ✅ Task 2 — location endpointlar |
+| `blink/lib/domain/entities/friend_location_entity.dart` | ✅ Task 3 |
+| `blink/lib/data/datasources/local/token_storage.dart` | ✅ Task 4 — SharedPrefs mirror |
+| `blink/lib/data/datasources/remote/api_location_datasource.dart` | ✅ Task 5 |
+| `blink/lib/services/location_task_handler.dart` | ✅ Task 6 — background isolate |
+| `blink/lib/services/location_service.dart` | ✅ Task 7 — foreground service control |
+| `blink/lib/services/socket_service.dart` | ✅ Task 8 |
+| `blink/lib/presentation/providers/socket_provider.dart` | ✅ Task 9 |
+| `blink/lib/presentation/providers/location_provider.dart` | ✅ Task 9 |
+| `blink/android/app/src/main/AndroidManifest.xml` | ✅ Task 10 — permissions + service |
+| `blink/lib/main.dart` | ✅ Task 11 — WithForegroundTask |
+| `blink/lib/presentation/screens/map/widgets/friend_location_sheet.dart` | ✅ Task 12 |
+| `blink/lib/presentation/screens/map/map_screen.dart` | ✅ Task 13 |
+| `blink/lib/core/router/app_router.dart` | ✅ Task 14 — `/map` route |
+| **`flutter analyze`** | ✅ Task 15 — No issues found |
+
+### Manual test (foydalanuvchi bajaradi)
+- [ ] `flutter run` — build muvaffaqiyatli
+- [ ] Login → `/map` ekran ochiladi
+- [ ] Permissions so'raladi (FINE + BACKGROUND + Notifications)
+- [ ] OpenStreetMap tiles yuklanadi
+- [ ] O'z marker (ko'k aylana) ko'rinadi
+- [ ] Foreground notifikatsiya paydo bo'ladi
+- [ ] Backend logida har 10s da `POST /location/update 200`
+- [ ] App background da ham backend log davom etadi
+
+## Phase 2B: Friends
 _Hali boshlanmadi_
 
-## Phase 3: Friends + Notifications
+## Phase 2C: Profile + Settings + Ghost Mode
 _Hali boshlanmadi_
 
-## Phase 4: Ghost Mode + Battery + Settings
+## Phase 3: Notifications + Geozones
 _Hali boshlanmadi_
