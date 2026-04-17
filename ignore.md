@@ -142,10 +142,54 @@ Har bir fayl yakunlangandan so'ng shu yerga yoziladi.
 - [ ] App background da ham backend log davom etadi
 
 ## Phase 2B: Friends
-_Hali boshlanmadi_
+
+**Maqsad:** 3 tab MainShell (Map/Friends/Profile), do'stlar qidirish/qabul/blok, QR ulashish, Profile + Ghost Mode, real-time `notification:new` socket banner.
+
+**Texnologiyalar:** `qr_flutter` (display), `mobile_scanner` (scan), Riverpod AsyncNotifier'lar.
+
+### Yakunlangan fayllar
+| Fayl | Holat |
+|------|-------|
+| `docs/superpowers/specs/2026-04-17-phase2b-friends-design.md` | ✅ Spec |
+| `docs/superpowers/plans/2026-04-17-phase2b-friends.md` | ✅ Plan |
+| `blink/pubspec.yaml` | ✅ Task 1 — qr_flutter, mobile_scanner |
+| `blink/lib/core/constants/api_constants.dart` | ✅ Task 2 — friends/blocks/profile-privacy |
+| `blink/lib/domain/entities/friend_entity.dart` | ✅ Task 3 |
+| `blink/lib/domain/entities/friend_request_entity.dart` | ✅ Task 4 |
+| `blink/lib/data/datasources/remote/api_friends_datasource.dart` | ✅ Task 5 |
+| `blink/lib/data/datasources/remote/api_block_datasource.dart` | ✅ Task 6 |
+| `blink/lib/data/datasources/remote/api_profile_datasource.dart` | ✅ Task 7 |
+| `blink/lib/data/datasources/local/token_storage.dart` | ✅ Task 8 — ghost mode flag |
+| `blink/lib/services/location_task_handler.dart` | ✅ Task 9 — ghost mode skip |
+| `blink/lib/services/socket_service.dart` | ✅ Task 10 — notification:new |
+| `blink/lib/presentation/providers/friends_provider.dart` | ✅ Task 11 |
+| `blink/lib/presentation/providers/profile_provider.dart` | ✅ Task 12 |
+| `blink/lib/presentation/screens/friends/widgets/friend_tile.dart` | ✅ Task 13 |
+| `blink/lib/presentation/screens/friends/widgets/friends_list_tab.dart` | ✅ Task 14 |
+| `blink/lib/presentation/screens/friends/widgets/requests_tab.dart` | ✅ Task 15 |
+| `blink/lib/presentation/screens/friends/widgets/qr_show_dialog.dart` | ✅ Task 16 |
+| `blink/lib/presentation/screens/friends/widgets/qr_scan_screen.dart` | ✅ Task 17 |
+| `blink/lib/presentation/screens/friends/widgets/add_friend_tab.dart` | ✅ Task 18 |
+| `blink/lib/presentation/screens/friends/friends_screen.dart` | ✅ Task 19 |
+| `blink/lib/presentation/screens/profile/profile_screen.dart` | ✅ Task 20 |
+| `blink/lib/presentation/widgets/in_app_banner.dart` | ✅ Task 21 |
+| `blink/lib/presentation/screens/main/main_shell.dart` | ✅ Task 22 |
+| `blink/lib/core/router/app_router.dart` | ✅ Task 23 — `/main` route |
+| `blink/android/app/src/main/AndroidManifest.xml` | ✅ Task 24 — CAMERA permission |
+| **`flutter analyze`** | ✅ Task 25 — No issues found |
+
+### Manual test (foydalanuvchi bajaradi)
+- [ ] Login → `/main` ekran (3 tab) ochiladi
+- [ ] Friends tab → "Qo'shish" → username yozish → search natijalari
+- [ ] "+" bosish → so'rov yuboriladi
+- [ ] Boshqa user → kelgan so'rovni qabul qilish → do'st bo'ladi
+- [ ] Long-press do'st → menu (Joylashuv / Unfriend / Block)
+- [ ] QR ko'rsatish → boshqa user skanerlasa → so'rov keladi
+- [ ] Profile tab → Ghost Mode ON → 10s da yana location yubormaydi
+- [ ] Real-time: friend so'rov yuborsa → in-app banner + Friends tab badge
 
 ## Phase 2C: Profile + Settings + Ghost Mode
-_Hali boshlanmadi_
+_Phase 2B ichida amalga oshirildi_
 
 ## Phase 3: Notifications + Geozones
 _Hali boshlanmadi_
