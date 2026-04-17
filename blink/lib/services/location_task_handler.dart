@@ -27,6 +27,14 @@ class LocationTaskHandler extends TaskHandler {
 
   Future<void> _sendLocation() async {
     try {
+      final ghostMode = await TokenStorage.readGhostModeFromPrefs();
+      if (ghostMode) {
+        FlutterForegroundTask.sendDataToMain({
+          'event': 'location_skipped_ghost',
+        });
+        return;
+      }
+
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
