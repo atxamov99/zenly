@@ -1,0 +1,114 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../domain/entities/friend_entity.dart';
+import '../../../providers/friends_provider.dart';
+import 'friend_tile.dart';
+
+class FriendsListTab extends ConsumerWidget {
+  const FriendsListTab({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final friendsAsync = ref.watch(friendsProvider);
+
+    return friendsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Xato: $e')),
+      data: (friends) {
+        if (friends.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Text(
+                "Hali do'st yo'q.\nQidirish bo'limidan boshla",
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () => ref.read(friendsProvider.notifier).refresh(),
+          child: ListView.builder(
+            itemCount: friends.length,
+            itemBuilder: (context, i) {
+              final friend = friends[i];
+              return FriendTile(
+                friend: friend,
+                onLongPress: () => _showActions(context, ref, friend),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showActions(BuildContext context, WidgetRef ref, FriendEntity friend) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: const Text('Joylashuvga borish'),
+              onTap: () {
+                Navigator.of(sheetCtx).pop();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_remove_outlined,
+                  color: Colors.orange),
+              title: const Text("Do'stlikni bekor qilish"),
+              onTap: () async {
+                Navigator.of(sheetCtx).pop();
+                try {
+                  await ref
+                      .read(friendsProvider.notifier)
+                      .unfriend(friend.userId);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${friend.displayName} o'chirildi")),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Xato: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block, color: Colors.red),
+              title: const Text('Bloklash'),
+              onTap: () async {
+                Navigator.of(sheetCtx).pop();
+                try {
+                  await ref
+                      .read(apiBlockDatasourceProvider)
+                      .block(friend.userId);
+                  await ref.read(friendsProvider.notifier).refresh();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${friend.displayName} bloklandi")),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Xato: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
