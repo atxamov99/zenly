@@ -5,6 +5,7 @@ class TokenStorage {
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _userIdKey = 'user_id';
+  static const _ghostModeKey = 'ghost_mode';
 
   final FlutterSecureStorage _storage;
 
@@ -45,6 +46,7 @@ class TokenStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_accessTokenKey);
     await prefs.remove(_userIdKey);
+    await prefs.remove(_ghostModeKey);
   }
 
   Future<bool> hasToken() async {
@@ -64,5 +66,20 @@ class TokenStorage {
   static Future<String?> readAccessTokenFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_accessTokenKey);
+  }
+
+  static Future<bool> readGhostModeFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_ghostModeKey) ?? false;
+  }
+
+  Future<void> setGhostMode(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_ghostModeKey, enabled);
+  }
+
+  Future<bool> getGhostMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_ghostModeKey) ?? false;
   }
 }
