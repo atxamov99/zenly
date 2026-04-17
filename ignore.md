@@ -188,8 +188,16 @@ Har bir fayl yakunlangandan so'ng shu yerga yoziladi.
 - [ ] Profile tab → Ghost Mode ON → 10s da yana location yubormaydi
 - [ ] Real-time: friend so'rov yuborsa → in-app banner + Friends tab badge
 
-## Phase 2C: Profile + Settings + Ghost Mode
-_Phase 2B ichida amalga oshirildi_
+## Phase 2C: Battery + Privacy
+
+**Phase 2B'da bajarilgan:** Profile ekran, Ghost Mode toggle.
+
+**Qoldi:**
+- 🔋 Batareya ulashish toggle (`battery_plus` paket bilan, do'stlarga foizni ko'rsatish/yashirish)
+- 🔒 Maxfiylik (location visibility: `precise` / `approximate` / `friends` / `none`)
+- Per-friend ghost list (`ghostFromList` — ma'lum do'stga ko'rinmaslik)
+
+_Hali boshlanmadi_
 
 ## Phase 3: Notifications + Geozones
 _Hali boshlanmadi_
