@@ -50,6 +50,10 @@ dependencies:
   rxdart: ^0.27.7
   http: ^1.2.0
 
+  # QR
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
