@@ -14,6 +14,8 @@ class SocketService {
   final _smartStatusController =
       StreamController<Map<String, dynamic>>.broadcast();
   final _connectionController = StreamController<bool>.broadcast();
+  final _notificationController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   SocketService(this._tokenStorage);
 
@@ -24,6 +26,8 @@ class SocketService {
   Stream<Map<String, dynamic>> get onSmartStatusChanged =>
       _smartStatusController.stream;
   Stream<bool> get onConnectionChanged => _connectionController.stream;
+  Stream<Map<String, dynamic>> get onNotification =>
+      _notificationController.stream;
 
   bool get isConnected => _socket?.connected ?? false;
 
@@ -66,6 +70,11 @@ class SocketService {
         if (data is Map) {
           _smartStatusController.add(Map<String, dynamic>.from(data));
         }
+      })
+      ..on('notification:new', (data) {
+        if (data is Map) {
+          _notificationController.add(Map<String, dynamic>.from(data));
+        }
       });
 
     _socket!.connect();
@@ -84,5 +93,6 @@ class SocketService {
     _presenceController.close();
     _smartStatusController.close();
     _connectionController.close();
+    _notificationController.close();
   }
 }
