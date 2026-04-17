@@ -13,10 +13,27 @@ class ApiConstants {
   // Profile
   static const String profile = '/profile';
   static const String avatar = '/profile/avatar';
+  static const String profilePrivacy = '/profile/privacy';
 
   // Location
   static const String locationUpdate = '/location/update';
   static const String visibleFriends = '/location/visible-friends';
   static String shareLocation(String friendId) => '/location/share/$friendId';
   static String unshareLocation(String friendId) => '/location/share/$friendId';
+
+  // Friends
+  static const String friends = '/friends';
+  static const String friendsSearch = '/friends/search';
+  static const String friendsRequests = '/friends/requests';
+  static const String friendRequest = '/friends/request';
+  static String friendRespond(String requestId) =>
+      '/friends/$requestId/respond';
+  static String friendCancelRequest(String requestId) =>
+      '/friends/request/$requestId';
+  static String unfriend(String friendId) => '/friends/$friendId';
+
+  // Blocks
+  static const String blocks = '/blocks';
+  static String blockUser(String userId) => '/blocks/$userId';
+  static String unblockUser(String userId) => '/blocks/$userId';
 }
