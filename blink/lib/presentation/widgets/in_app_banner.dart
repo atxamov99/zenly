@@ -66,9 +66,9 @@ class InAppBanner {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: dismiss,
+                  const IconButton(
+                    icon: Icon(Icons.close, size: 18),
+                    onPressed: InAppBanner.dismiss,
                   ),
                 ],
               ),
