@@ -14,8 +14,10 @@ class AppTheme {
         ),
         scaffoldBackgroundColor: AppColors.lightBg,
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.lightBg,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
+          scrolledUnderElevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
             color: AppColors.textPrimary,
