@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'glass/glass_surface.dart';
+
 class InAppBanner {
   static OverlayEntry? _entry;
   static Timer? _autoDismiss;
@@ -31,20 +33,13 @@ class InAppBanner {
               dismiss();
               onTap?.call();
             },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
+            borderRadius: BorderRadius.circular(20),
+            child: GlassSurface(
+              blur: 30,
+              tintOpacity: 0.55,
+              radius: 20,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   const CircleAvatar(
@@ -59,15 +54,17 @@ class InAppBanner {
                       children: [
                         Text(title,
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold)),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87)),
                         if (subtitle != null && subtitle.isNotEmpty)
                           Text(subtitle,
-                              style: const TextStyle(fontSize: 12)),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black54)),
                       ],
                     ),
                   ),
                   const IconButton(
-                    icon: Icon(Icons.close, size: 18),
+                    icon: Icon(Icons.close, size: 18, color: Colors.black54),
                     onPressed: InAppBanner.dismiss,
                   ),
                 ],
