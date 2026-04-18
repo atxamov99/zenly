@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/friends_provider.dart';
+import '../../widgets/glass/glass_app_bar.dart';
 import 'widgets/add_friend_tab.dart';
 import 'widgets/friends_list_tab.dart';
 import 'widgets/requests_tab.dart';
@@ -16,7 +17,8 @@ class FriendsScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(
           title: const Text("Do'stlar"),
           bottom: TabBar(
             tabs: [
@@ -53,12 +55,19 @@ class FriendsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
-            FriendsListTab(),
-            RequestsTab(),
-            AddFriendTab(),
-          ],
+        body: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top +
+                kToolbarHeight +
+                kTextTabBarHeight,
+          ),
+          child: const TabBarView(
+            children: [
+              FriendsListTab(),
+              RequestsTab(),
+              AddFriendTab(),
+            ],
+          ),
         ),
       ),
     );
