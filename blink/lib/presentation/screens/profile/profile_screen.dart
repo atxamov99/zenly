@@ -31,9 +31,18 @@ class ProfileScreen extends ConsumerWidget {
       ),
       body: userAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Xato: $e')),
+        error: (e, _) => _ErrorState(
+          message: 'Profilni yuklab bo\'lmadi',
+          detail: '$e',
+          onRetry: () => ref.invalidate(currentUserProvider),
+        ),
         data: (user) {
-          if (user == null) return const SizedBox.shrink();
+          if (user == null) {
+            return const _ErrorState(
+              message: 'Profil topilmadi',
+              detail: 'Iltimos, qayta kiring.',
+            );
+          }
           return ListView(
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + kToolbarHeight + 8,
@@ -128,6 +137,55 @@ class ProfileScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final String detail;
+  final VoidCallback? onRetry;
+
+  const _ErrorState({
+    required this.message,
+    required this.detail,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off,
+                size: 56, color: Colors.black38),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: const TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              detail,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              FilledButton.tonalIcon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Qayta urinib ko\'rish'),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

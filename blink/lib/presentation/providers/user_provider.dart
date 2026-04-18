@@ -30,11 +30,7 @@ final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
   final auth = ref.watch(authStateProvider);
   final uid = auth.value;
   if (uid == null) return null;
-  try {
-    return await ref.watch(userRepositoryProvider).getUserById(uid);
-  } catch (_) {
-    return null;
-  }
+  return await ref.watch(userRepositoryProvider).getUserById(uid);
 });
 
 /// Backend tomondan profil yaratilganligini tekshiradi.
