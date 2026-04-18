@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/friends_provider.dart';
 import '../../providers/socket_provider.dart';
+import '../../widgets/glass/glass_capsule_nav.dart';
 import '../../widgets/in_app_banner.dart';
 import '../friends/friends_screen.dart';
 import '../map/map_screen.dart';
@@ -63,6 +64,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     final incomingCount = ref.watch(incomingRequestCountProvider);
 
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _index,
         children: const [
@@ -71,54 +73,22 @@ class _MainShellState extends ConsumerState<MainShell> {
           ProfileScreen(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: GlassCapsuleNav(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
-        type: BottomNavigationBarType.fixed,
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.map_outlined),
-            activeIcon: Icon(Icons.map),
-            label: 'Xarita',
+          const GlassNavItem(
+            icon: Icons.map_outlined,
+            activeIcon: Icons.map,
           ),
-          BottomNavigationBarItem(
-            icon: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(Icons.people_outline),
-                if (incomingCount > 0)
-                  Positioned(
-                    top: -4,
-                    right: -6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints:
-                          const BoxConstraints(minWidth: 16, minHeight: 16),
-                      child: Text(
-                        '$incomingCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            activeIcon: const Icon(Icons.people),
-            label: "Do'stlar",
+          GlassNavItem(
+            icon: Icons.people_outline,
+            activeIcon: Icons.people,
+            badgeCount: incomingCount,
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil',
+          const GlassNavItem(
+            icon: Icons.person_outline,
+            activeIcon: Icons.person,
           ),
         ],
       ),
