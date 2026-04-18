@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../domain/entities/friend_location_entity.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/socket_provider.dart';
+import '../../widgets/glass/glass_fab.dart';
 import 'widgets/friend_location_sheet.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
@@ -128,24 +129,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             Positioned(
               right: 16,
               bottom: 32,
-              child: FloatingActionButton(
-                heroTag: 'recenter',
+              child: GlassFab(
+                icon: Icons.my_location,
                 onPressed: () {
                   if (ownLocation != null) {
                     _mapController.move(ownLocation, 16);
                   }
                 },
-                child: const Icon(Icons.my_location),
               ),
             ),
             Positioned(
               right: 16,
               top: 48,
-              child: FloatingActionButton.small(
-                heroTag: 'refresh',
+              child: GlassFab(
+                icon: Icons.refresh,
+                size: 44,
                 onPressed: () =>
                     ref.read(friendsLocationProvider.notifier).refresh(),
-                child: const Icon(Icons.refresh),
               ),
             ),
           ],
