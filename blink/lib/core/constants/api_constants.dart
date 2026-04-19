@@ -36,4 +36,11 @@ class ApiConstants {
   static const String blocks = '/blocks';
   static String blockUser(String userId) => '/blocks/$userId';
   static String unblockUser(String userId) => '/blocks/$userId';
+
+  // Chat
+  static const String chats = '/chats';
+  static String chatMessages(String friendId) => '/chats/$friendId/messages';
+  static String chatRead(String friendId) => '/chats/$friendId/read';
+  static String editMessage(String messageId) => '/chats/messages/$messageId';
+  static String deleteMessage(String messageId) => '/chats/messages/$messageId';
 }
