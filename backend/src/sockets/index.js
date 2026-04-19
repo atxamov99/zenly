@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Friendship = require("../models/Friendship");
 const User = require("../models/User");
 const { canViewerAccessByRule } = require("../utils/visibility");
+const { registerChatHandlers } = require("./chat.socket");
 
 let io;
 const onlineConnections = new Map();
@@ -92,6 +93,8 @@ function initSocket(server) {
     socket.emit("socket:ready", {
       userId
     });
+
+    registerChatHandlers(socket);
 
     socket.on("disconnect", () => {
       const currentCount = onlineConnections.get(userId) || 0;
