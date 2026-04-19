@@ -14,6 +14,7 @@ const inviteRoutes = require("./routes/invite.routes");
 const locationRoutes = require("./routes/location.routes");
 const notificationRoutes = require("./routes/notification.routes");
 const pushRoutes = require("./routes/push.routes");
+const chatRoutes = require("./routes/chat.routes");
 const swaggerSpec = require("./config/swagger");
 
 function createApp() {
@@ -50,6 +51,7 @@ function createApp() {
   app.use("/api/location", locationRoutes);
   app.use("/api/notifications", notificationRoutes);
   app.use("/api/push", pushRoutes);
+  app.use("/api/chats", chatRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ message: "Route not found" });
