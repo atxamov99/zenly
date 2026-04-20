@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../models/message_model.dart';
-import '../../models/conversation_model.dart';
 
 /// Streams normalized chat events. The repository merges these with REST data.
 sealed class ChatEvent {}
