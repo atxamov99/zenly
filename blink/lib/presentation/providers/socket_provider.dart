@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../services/socket_service.dart';
 import 'auth_provider.dart';
@@ -12,4 +13,8 @@ final socketServiceProvider = Provider<SocketService>((ref) {
 final socketConnectionProvider = StreamProvider<bool>((ref) {
   final service = ref.watch(socketServiceProvider);
   return service.onConnectionChanged;
+});
+
+final socketProvider = Provider<io.Socket>((ref) {
+  return ref.watch(socketServiceProvider).socket;
 });

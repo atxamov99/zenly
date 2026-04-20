@@ -31,6 +31,14 @@ class SocketService {
 
   bool get isConnected => _socket?.connected ?? false;
 
+  io.Socket get socket {
+    final s = _socket;
+    if (s == null) {
+      throw StateError('Socket not connected. Call connect() first.');
+    }
+    return s;
+  }
+
   Future<void> connect() async {
     if (_socket != null && _socket!.connected) return;
 
