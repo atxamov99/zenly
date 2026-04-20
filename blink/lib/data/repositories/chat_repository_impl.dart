@@ -222,7 +222,7 @@ class ChatRepositoryImpl implements ChatRepository {
             final updated = msgs.value[idx].copyWith(
               text: e.text,
               editedAt: e.editedAt,
-            ) as MessageModel;
+            );
             msgs.value[idx] = updated;
             _messageStreams[msgs.key]?.add(List.unmodifiable(msgs.value));
           }
@@ -242,7 +242,7 @@ class ChatRepositoryImpl implements ChatRepository {
               return m.copyWith(readBy: [
                 ...m.readBy,
                 MessageReadReceipt(userId: e.friendId, readAt: e.readAt),
-              ]) as MessageModel;
+              ]);
             }
             return m;
           }).toList();
@@ -286,7 +286,7 @@ class ChatRepositoryImpl implements ChatRepository {
       final idx = entry.value.indexWhere((m) => m.id == messageId);
       if (idx >= 0) {
         final m = entry.value[idx];
-        entry.value[idx] = m.copyWith(deletedAt: DateTime.now()) as MessageModel;
+        entry.value[idx] = m.copyWith(deletedAt: DateTime.now());
         _messageStreams[entry.key]?.add(List.unmodifiable(entry.value));
         return;
       }

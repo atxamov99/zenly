@@ -15,6 +15,29 @@ class MessageModel extends MessageEntity {
     super.clientMessageId,
   });
 
+  @override
+  MessageModel copyWith({
+    String? id,
+    String? text,
+    DateTime? editedAt,
+    DateTime? deletedAt,
+    List<MessageReadReceipt>? readBy,
+  }) {
+    return MessageModel(
+      id: id ?? this.id,
+      conversationId: conversationId,
+      senderId: senderId,
+      type: type,
+      text: text ?? this.text,
+      imageUrl: imageUrl,
+      createdAt: createdAt,
+      editedAt: editedAt ?? this.editedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      readBy: readBy ?? this.readBy,
+      clientMessageId: clientMessageId,
+    );
+  }
+
   factory MessageModel.fromApi(Map<String, dynamic> json) {
     final readByRaw = (json['readBy'] as List<dynamic>?) ?? const [];
     return MessageModel(
