@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../domain/entities/friend_entity.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
+import '../../presentation/screens/chat/chat_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_shell.dart';
 import '../../presentation/screens/map/map_screen.dart';
@@ -19,6 +22,8 @@ class AppRoutes {
   static const home = '/home';
   static const map = '/map';
   static const main = '/main';
+  static const chat = '/chat';
+  static String chatFor(String friendId) => '/chat/$friendId';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -83,6 +88,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.main,
         builder: (_, __) => const MainShell(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.chat}/:friendId',
+        builder: (context, state) {
+          final friend = state.extra as FriendEntity?;
+          if (friend == null) {
+            return const Scaffold(
+              body: Center(child: Text('Friend not provided')),
+            );
+          }
+          return ChatScreen(friend: friend);
+        },
       ),
     ],
   );
