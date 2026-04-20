@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../domain/entities/friend_entity.dart';
+import '../../../providers/chat_provider.dart';
 import '../../../providers/friends_provider.dart';
 import 'friend_tile.dart';
 
@@ -11,6 +14,8 @@ class FriendsListTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final friendsAsync = ref.watch(friendsProvider);
+    final conversationsAsync = ref.watch(conversationsProvider);
+    final convoMap = conversationsAsync.value ?? const {};
 
     return friendsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -35,6 +40,11 @@ class FriendsListTab extends ConsumerWidget {
               final friend = friends[i];
               return FriendTile(
                 friend: friend,
+                conversation: convoMap[friend.userId],
+                onTap: () => context.push(
+                  AppRoutes.chatFor(friend.userId),
+                  extra: friend,
+                ),
                 onLongPress: () => _showActions(context, ref, friend),
               );
             },
