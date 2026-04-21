@@ -150,7 +150,10 @@ router.post("/google", authLimiter, async (req, res, next) => {
 
     let payload;
     try {
-      const ticket = await googleClient.verifyIdToken({ idToken });
+      const ticket = await googleClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
       payload = ticket.getPayload();
     } catch (err) {
       return res.status(401).json({ message: "Invalid Google idToken" });
