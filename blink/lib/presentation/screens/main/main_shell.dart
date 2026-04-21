@@ -25,7 +25,14 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final socketService = ref.read(socketServiceProvider);
+      try {
+        await socketService.connect();
+      } catch (_) {
+        // Token yo'q yoki network yo'q — keyin chat ochilganda qayta urinamiz.
+      }
+      if (!mounted) return;
       ref.read(friendsProvider);
       ref.read(friendRequestsProvider);
       _subscribeNotifications();

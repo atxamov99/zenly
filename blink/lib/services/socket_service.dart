@@ -32,35 +32,26 @@ class SocketService {
   bool get isConnected => _socket?.connected ?? false;
 
   io.Socket get socket {
-    final s = _socket;
-    if (s == null) {
-      throw StateError('Socket not connected. Call connect() first.');
-    }
-    return s;
+    return _ensureSocket();
   }
 
-  Future<void> connect() async {
-    if (_socket != null && _socket!.connected) return;
-
-    final token = await _tokenStorage.getAccessToken();
-    if (token == null || token.isEmpty) {
-      throw StateError('No token available for socket connection');
-    }
-
-    _socket = io.io(
+  io.Socket _ensureSocket() {
+    final s = _socket;
+    if (s != null) return s;
+    // Lazy-instantiate socket instance (not yet connected).
+    // Token is attached later in connect() via socket.auth.
+    final created = io.io(
       ApiConstants.socketUrl,
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
-          .setAuth({'token': token})
           .enableReconnection()
           .setReconnectionAttempts(0x7FFFFFFF)
           .setReconnectionDelay(1000)
           .setReconnectionDelayMax(10000)
           .build(),
     );
-
-    _socket!
+    created
       ..onConnect((_) => _connectionController.add(true))
       ..onDisconnect((_) => _connectionController.add(false))
       ..on('socket:ready', (_) => _connectionController.add(true))
@@ -84,8 +75,21 @@ class SocketService {
           _notificationController.add(Map<String, dynamic>.from(data));
         }
       });
+    _socket = created;
+    return created;
+  }
 
-    _socket!.connect();
+  Future<void> connect() async {
+    final s = _ensureSocket();
+    if (s.connected) return;
+
+    final token = await _tokenStorage.getAccessToken();
+    if (token == null || token.isEmpty) {
+      throw StateError('No token available for socket connection');
+    }
+
+    s.auth = {'token': token};
+    s.connect();
   }
 
   void disconnect() {
