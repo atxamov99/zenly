@@ -6,6 +6,8 @@ import '../../../domain/entities/friend_entity.dart';
 import '../../../domain/entities/message_entity.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../widgets/glass/glass_background.dart';
+import '../../widgets/glass/glass_empty_state.dart';
 import 'widgets/chat_app_bar.dart';
 import 'widgets/image_message_viewer.dart';
 import 'widgets/message_bubble.dart';
@@ -109,8 +111,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final typingAsync = ref.watch(typingProvider(friendId));
     final myUid = ref.watch(authStateProvider).value;
 
-    return Scaffold(
+    return GlassBackground(
+      child: Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: ChatAppBar(
         displayName: widget.friend.displayName.isNotEmpty
             ? widget.friend.displayName
@@ -131,12 +135,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 child: messagesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Xato: $e')),
+                  error: (e, _) => GlassEmptyState(
+                    icon: Icons.cloud_off,
+                    title: "Xabarlarni yuklab bo'lmadi",
+                    detail: '$e',
+                    onRetry: () => ref.invalidate(messagesProvider(friendId)),
+                  ),
                   data: (messages) {
                     if (messages.isEmpty) {
-                      return const Center(
-                        child: Text(
-                            "Xabarlar yo'q. Birinchi bo'lib salom yozing."),
+                      return const GlassEmptyState(
+                        icon: Icons.chat_bubble_outline,
+                        title: "Xabarlar yo'q",
+                        detail: "Birinchi bo'lib salom yozing.",
                       );
                     }
                     return ListView.builder(
@@ -198,6 +208,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

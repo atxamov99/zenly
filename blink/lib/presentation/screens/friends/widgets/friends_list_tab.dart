@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../domain/entities/friend_entity.dart';
 import '../../../providers/chat_provider.dart';
 import '../../../providers/friends_provider.dart';
+import '../../../widgets/glass/glass_empty_state.dart';
 import 'friend_tile.dart';
 
 class FriendsListTab extends ConsumerWidget {
@@ -19,17 +20,18 @@ class FriendsListTab extends ConsumerWidget {
 
     return friendsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Xato: $e')),
+      error: (e, _) => GlassEmptyState(
+        icon: Icons.cloud_off,
+        title: "Do'stlarni yuklab bo'lmadi",
+        detail: '$e',
+        onRetry: () => ref.read(friendsProvider.notifier).refresh(),
+      ),
       data: (friends) {
         if (friends.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: Text(
-                "Hali do'st yo'q.\nQidirish bo'limidan boshla",
-                textAlign: TextAlign.center,
-              ),
-            ),
+          return const GlassEmptyState(
+            icon: Icons.people_outline,
+            title: "Hali do'st yo'q",
+            detail: "Qidirish bo'limidan boshlang",
           );
         }
         return RefreshIndicator(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/glass_tokens.dart';
 import '../../providers/friends_provider.dart';
 import '../../widgets/glass/glass_app_bar.dart';
+import '../../widgets/glass/glass_background.dart';
 import 'widgets/add_friend_tab.dart';
 import 'widgets/friends_list_tab.dart';
 import 'widgets/requests_tab.dart';
@@ -15,10 +16,12 @@ class FriendsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final incomingCount = ref.watch(incomingRequestCountProvider);
 
-    return DefaultTabController(
+    return GlassBackground(
+      child: DefaultTabController(
       length: 3,
       child: Scaffold(
         extendBodyBehindAppBar: true,
+        backgroundColor: Colors.transparent,
         appBar: GlassAppBar(
           title: const Text("Do'stlar"),
           bottom: PreferredSize(
@@ -99,6 +102,7 @@ class FriendsScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
