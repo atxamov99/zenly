@@ -158,7 +158,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
             Positioned(
               right: 16,
-              bottom: 32,
+              bottom: 120,
               child: GlassFab(
                 icon: Icons.my_location,
                 onPressed: () {
