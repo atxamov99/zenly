@@ -23,7 +23,7 @@ router.use(auth);
 
 router.post("/update", locationUpdateLimiter, async (req, res, next) => {
   try {
-    const { lat, lng, accuracy } = req.body;
+    const { lat, lng, accuracy, batteryPercent } = req.body;
 
     if (typeof lat !== "number" || typeof lng !== "number") {
       return res.status(400).json({ message: "lat and lng must be numbers" });
@@ -31,6 +31,14 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
 
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       return res.status(400).json({ message: "Coordinates are out of range" });
+    }
+
+    let normalizedBattery = null;
+    if (batteryPercent !== undefined && batteryPercent !== null) {
+      if (typeof batteryPercent !== "number" || batteryPercent < 0 || batteryPercent > 100) {
+        return res.status(400).json({ message: "batteryPercent must be 0..100" });
+      }
+      normalizedBattery = Math.round(batteryPercent);
     }
 
     const roundedLat = Number(lat.toFixed(6));
@@ -65,6 +73,11 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
     const owner = await User.findById(req.user._id).select("privacy presence username displayName");
     const now = new Date();
 
+    if (normalizedBattery !== null) {
+      owner.presence.batteryPercent = normalizedBattery;
+      owner.presence.batteryUpdatedAt = locationTimestamp;
+    }
+
     await LocationShare.updateMany(
       {
         owner: req.user._id,
@@ -83,8 +96,14 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
     }).select("viewer");
 
     const io = getIo();
+    const ghostFromIds = new Set(
+      (owner.privacy?.ghostFromList || []).map((id) => id.toString())
+    );
     if (!owner.privacy?.ghostMode) {
       for (const share of activeShares) {
+        if (ghostFromIds.has(share.viewer.toString())) {
+          continue;
+        }
         const [friends, blocked] = await Promise.all([
           areFriends(req.user._id, share.viewer),
           isBlockedEitherWay(req.user._id, share.viewer)
@@ -112,6 +131,22 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
           accuracy: location.accuracy,
           lastSeenAt: location.lastSeenAt
         });
+
+        if (normalizedBattery !== null) {
+          const canSeeBattery = await canViewerAccessByRule({
+            owner,
+            viewerId: share.viewer,
+            rule: owner.privacy?.batteryVisibility,
+            areFriends: friends
+          });
+          if (canSeeBattery) {
+            io.to(`user:${share.viewer.toString()}`).emit("friend:battery_changed", {
+              friendId: req.user._id.toString(),
+              batteryPercent: normalizedBattery,
+              updatedAt: locationTimestamp
+            });
+          }
+        }
 
         if (previousSmartStatus !== nextSmartStatus) {
           io.to(`user:${share.viewer.toString()}`).emit("friend:smart_status_changed", {
@@ -337,6 +372,14 @@ router.get("/visible-friends", async (req, res, next) => {
         continue;
       }
 
+      // Per-friend ghost: if the friend put me in their ghostFromList, skip them.
+      const ghostFromList = (friend.privacy?.ghostFromList || []).map((id) =>
+        id.toString()
+      );
+      if (ghostFromList.includes(req.user._id.toString())) {
+        continue;
+      }
+
       const canSeeLocation = await canViewerAccessByRule({
         owner: friend,
         viewerId: req.user._id,
@@ -353,6 +396,14 @@ router.get("/visible-friends", async (req, res, next) => {
         inCircle: circleOwners.has(friend._id.toString())
       });
 
+      const canSeeBattery = await canViewerAccessByRule({
+        owner: friend,
+        viewerId: req.user._id,
+        rule: friend.privacy?.batteryVisibility,
+        areFriends: friendsWithOwner,
+        inCircle: circleOwners.has(friend._id.toString())
+      });
+
       if (!canSeeLocation) {
         continue;
       }
@@ -364,6 +415,9 @@ router.get("/visible-friends", async (req, res, next) => {
         avatarUrl: friend.avatarUrl,
         isOnline: friend.presence?.isOnline || false,
         smartStatus: friend.presence?.smartStatus || "offline",
+        batteryPercent: canSeeBattery
+          ? friend.presence?.batteryPercent ?? null
+          : null,
         lat: location.lat,
         lng: location.lng,
         accuracy: location.accuracy,

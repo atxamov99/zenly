@@ -21,6 +21,14 @@ class ChatRepositoryImpl implements ChatRepository {
       StreamController.broadcast();
   final Map<String, StreamController<bool>> _typing = {};
 
+  // ── Groups (keyed by conversationId) ─────────────────────────
+  final Map<String, List<MessageModel>> _groupMessages = {};
+  final Map<String, StreamController<List<MessageEntity>>>
+      _groupMessageStreams = {};
+  final Map<String, ConversationModel> _groupConversations = {};
+  final StreamController<List<ConversationEntity>> _groupsCtrl =
+      StreamController.broadcast();
+
   late final StreamSubscription _socketSub;
 
   ChatRepositoryImpl({
@@ -34,7 +42,11 @@ class ChatRepositoryImpl implements ChatRepository {
   void dispose() {
     _socketSub.cancel();
     _conversationsCtrl.close();
+    _groupsCtrl.close();
     for (final c in _messageStreams.values) {
+      c.close();
+    }
+    for (final c in _groupMessageStreams.values) {
       c.close();
     }
     for (final c in _typing.values) {
@@ -53,10 +65,27 @@ class ChatRepositoryImpl implements ChatRepository {
               currentUserId: currentUserId,
             ))
         .toList();
-    _conversations
-      ..clear()
-      ..addEntries(list.map((c) => MapEntry(c.otherUserId, c)));
+    _conversations.clear();
+    _groupConversations.clear();
+    for (final c in list) {
+      if (c.isGroup) {
+        _groupConversations[c.id] = c;
+      } else if (c.otherUserId.isNotEmpty) {
+        _conversations[c.otherUserId] = c;
+      }
+    }
     _conversationsCtrl.add(_sortedConversations());
+    _groupsCtrl.add(_sortedGroups());
+    return list;
+  }
+
+  List<ConversationEntity> _sortedGroups() {
+    final list = _groupConversations.values.toList();
+    list.sort((a, b) {
+      final ad = a.lastMessageAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bd = b.lastMessageAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bd.compareTo(ad);
+    });
     return list;
   }
 
@@ -198,35 +227,38 @@ class ChatRepositoryImpl implements ChatRepository {
   void _onSocketEvent(ChatEvent event) {
     switch (event) {
       case ChatMessageEvent e:
-        // Determine friendId from the conversation participants.
+        final isGroup = e.conversationRaw['isGroup'] as bool? ?? false;
+        final convModel = ConversationModel.fromApi(
+          e.conversationRaw,
+          currentUserId: currentUserId,
+        );
+
+        if (isGroup) {
+          _insertGroupMessage(convModel.id, e.message);
+          _groupConversations[convModel.id] = convModel;
+          _groupsCtrl.add(_sortedGroups());
+          return;
+        }
+
+        // DM: route by friendId.
         final participants = ((e.conversationRaw['participants'] as List?) ?? [])
-            .map((x) => x.toString())
-            .toList();
+            .map((x) {
+          if (x is Map) {
+            return (x['_id'] ?? x['id'] ?? '').toString();
+          }
+          return x.toString();
+        }).toList();
         final friendId = participants.firstWhere(
           (id) => id != currentUserId,
           orElse: () => '',
         );
         if (friendId.isEmpty) return;
         _insertMessage(friendId, e.message);
-        // Refresh conversation cache from raw.
-        _conversations[friendId] = ConversationModel.fromApi(
-          e.conversationRaw,
-          currentUserId: currentUserId,
-        );
+        _conversations[friendId] = convModel;
         _conversationsCtrl.add(_sortedConversations());
 
       case ChatEditedEvent e:
-        for (final msgs in _messages.entries) {
-          final idx = msgs.value.indexWhere((m) => m.id == e.messageId);
-          if (idx >= 0) {
-            final updated = msgs.value[idx].copyWith(
-              text: e.text,
-              editedAt: e.editedAt,
-            );
-            msgs.value[idx] = updated;
-            _messageStreams[msgs.key]?.add(List.unmodifiable(msgs.value));
-          }
-        }
+        _editMessage(e.messageId, e.text, e.editedAt);
 
       case ChatDeletedEvent e:
         _markDeleted(e.messageId);
@@ -258,8 +290,151 @@ class ChatRepositoryImpl implements ChatRepository {
           () => StreamController<bool>.broadcast(),
         );
         ctrl.add(e.isTyping);
+
+      case ChatGroupCreatedEvent e:
+        final model = ConversationModel.fromApi(
+          e.conversationRaw,
+          currentUserId: currentUserId,
+        );
+        _groupConversations[model.id] = model;
+        _groupsCtrl.add(_sortedGroups());
+
+      case ChatGroupUpdatedEvent e:
+        final existing = _groupConversations[e.conversationId];
+        if (existing == null) return;
+        _groupConversations[e.conversationId] = ConversationModel(
+          id: existing.id,
+          isGroup: existing.isGroup,
+          title: e.title ?? existing.title,
+          avatarUrl: existing.avatarUrl,
+          ownerId: existing.ownerId,
+          adminIds: existing.adminIds,
+          members: existing.members,
+          otherUserId: existing.otherUserId,
+          lastMessage: existing.lastMessage,
+          lastMessageAt: existing.lastMessageAt,
+          unreadCount: existing.unreadCount,
+        );
+        _groupsCtrl.add(_sortedGroups());
+
+      case ChatMemberAddedEvent _:
+      case ChatMemberRemovedEvent _:
+        // Members changed — easiest is to refetch this group's full data.
+        // For now, refetch the conversation list which re-populates members.
+        fetchConversations();
     }
   }
+
+  // ── Group chat ──────────────────────────────────────────────
+
+  @override
+  Stream<List<ConversationEntity>> watchGroups() {
+    if (_groupConversations.isEmpty && _conversations.isEmpty) {
+      fetchConversations();
+    } else {
+      scheduleMicrotask(() => _groupsCtrl.add(_sortedGroups()));
+    }
+    return _groupsCtrl.stream;
+  }
+
+  @override
+  Stream<List<MessageEntity>> watchGroupMessages(String conversationId) {
+    final ctrl = _groupMessageStreams.putIfAbsent(
+      conversationId,
+      () => StreamController<List<MessageEntity>>.broadcast(),
+    );
+    api.fetchGroupMessages(conversationId: conversationId).then((seed) {
+      _groupMessages[conversationId] = seed;
+      ctrl.add(List.unmodifiable(seed));
+    }).catchError((_) {});
+    return ctrl.stream;
+  }
+
+  @override
+  Future<ConversationEntity> createGroup({
+    required String title,
+    required List<String> memberIds,
+  }) async {
+    final raw = await api.createGroup(title: title, memberIds: memberIds);
+    final model = ConversationModel.fromApi(raw, currentUserId: currentUserId);
+    _groupConversations[model.id] = model;
+    _groupsCtrl.add(_sortedGroups());
+    return model;
+  }
+
+  @override
+  Future<MessageEntity> sendGroupText({
+    required String conversationId,
+    required String text,
+  }) async {
+    final msg =
+        await api.sendGroupText(conversationId: conversationId, text: text);
+    _insertGroupMessage(conversationId, msg);
+    return msg;
+  }
+
+  @override
+  Future<MessageEntity> sendGroupImage({
+    required String conversationId,
+    required String imagePath,
+  }) async {
+    final msg = await api.sendGroupImage(
+      conversationId: conversationId,
+      imagePath: imagePath,
+    );
+    _insertGroupMessage(conversationId, msg);
+    return msg;
+  }
+
+  @override
+  Future<void> markGroupAsRead(String conversationId) async {
+    await api.markGroupRead(conversationId);
+    final conv = _groupConversations[conversationId];
+    if (conv != null) {
+      _groupConversations[conversationId] = ConversationModel(
+        id: conv.id,
+        isGroup: conv.isGroup,
+        title: conv.title,
+        avatarUrl: conv.avatarUrl,
+        ownerId: conv.ownerId,
+        adminIds: conv.adminIds,
+        members: conv.members,
+        otherUserId: conv.otherUserId,
+        lastMessage: conv.lastMessage,
+        lastMessageAt: conv.lastMessageAt,
+        unreadCount: 0,
+      );
+      _groupsCtrl.add(_sortedGroups());
+    }
+  }
+
+  @override
+  Future<void> renameGroup({
+    required String conversationId,
+    required String title,
+  }) async {
+    final raw = await api.renameGroup(
+      conversationId: conversationId,
+      title: title,
+    );
+    final model = ConversationModel.fromApi(raw, currentUserId: currentUserId);
+    _groupConversations[model.id] = model;
+    _groupsCtrl.add(_sortedGroups());
+  }
+
+  @override
+  Future<void> addGroupMember({
+    required String conversationId,
+    required String userId,
+  }) =>
+      api.addGroupMember(conversationId: conversationId, userId: userId);
+
+  @override
+  Future<void> removeGroupMember({
+    required String conversationId,
+    required String userId,
+  }) =>
+      api.removeGroupMember(conversationId: conversationId, userId: userId);
 
   // ── Helpers ──────────────────────────────────────────────────
 
@@ -268,6 +443,14 @@ class ChatRepositoryImpl implements ChatRepository {
     if (list.any((m) => m.id == msg.id)) return; // dedupe
     list.insert(0, msg);
     _messageStreams[friendId]?.add(List.unmodifiable(list));
+  }
+
+  void _insertGroupMessage(String conversationId, MessageModel msg) {
+    final list =
+        _groupMessages.putIfAbsent(conversationId, () => <MessageModel>[]);
+    if (list.any((m) => m.id == msg.id)) return;
+    list.insert(0, msg);
+    _groupMessageStreams[conversationId]?.add(List.unmodifiable(list));
   }
 
   void _replaceMessage(MessageModel msg) {
@@ -288,6 +471,40 @@ class ChatRepositoryImpl implements ChatRepository {
         final m = entry.value[idx];
         entry.value[idx] = m.copyWith(deletedAt: DateTime.now());
         _messageStreams[entry.key]?.add(List.unmodifiable(entry.value));
+        return;
+      }
+    }
+    for (final entry in _groupMessages.entries) {
+      final idx = entry.value.indexWhere((m) => m.id == messageId);
+      if (idx >= 0) {
+        final m = entry.value[idx];
+        entry.value[idx] = m.copyWith(deletedAt: DateTime.now());
+        _groupMessageStreams[entry.key]?.add(List.unmodifiable(entry.value));
+        return;
+      }
+    }
+  }
+
+  void _editMessage(String messageId, String text, DateTime editedAt) {
+    for (final entry in _messages.entries) {
+      final idx = entry.value.indexWhere((m) => m.id == messageId);
+      if (idx >= 0) {
+        entry.value[idx] = entry.value[idx].copyWith(
+          text: text,
+          editedAt: editedAt,
+        );
+        _messageStreams[entry.key]?.add(List.unmodifiable(entry.value));
+        return;
+      }
+    }
+    for (final entry in _groupMessages.entries) {
+      final idx = entry.value.indexWhere((m) => m.id == messageId);
+      if (idx >= 0) {
+        entry.value[idx] = entry.value[idx].copyWith(
+          text: text,
+          editedAt: editedAt,
+        );
+        _groupMessageStreams[entry.key]?.add(List.unmodifiable(entry.value));
         return;
       }
     }

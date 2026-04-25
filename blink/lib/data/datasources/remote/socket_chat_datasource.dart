@@ -38,6 +38,29 @@ class ChatTypingEvent extends ChatEvent {
   ChatTypingEvent(this.friendId, this.isTyping);
 }
 
+class ChatGroupCreatedEvent extends ChatEvent {
+  final Map<String, dynamic> conversationRaw;
+  ChatGroupCreatedEvent(this.conversationRaw);
+}
+
+class ChatGroupUpdatedEvent extends ChatEvent {
+  final String conversationId;
+  final String? title;
+  ChatGroupUpdatedEvent(this.conversationId, {this.title});
+}
+
+class ChatMemberAddedEvent extends ChatEvent {
+  final String conversationId;
+  final String userId;
+  ChatMemberAddedEvent(this.conversationId, this.userId);
+}
+
+class ChatMemberRemovedEvent extends ChatEvent {
+  final String conversationId;
+  final String userId;
+  ChatMemberRemovedEvent(this.conversationId, this.userId);
+}
+
 class SocketChatDatasource {
   final io.Socket _socket;
   final _events = StreamController<ChatEvent>.broadcast();
@@ -98,6 +121,45 @@ class SocketChatDatasource {
         _events.add(ChatTypingEvent(
           raw['friendId'] as String,
           raw['isTyping'] as bool,
+        ));
+      } catch (_) {}
+    });
+
+    _socket.on('chat:group_created', (data) {
+      try {
+        final raw = data as Map<String, dynamic>;
+        _events.add(ChatGroupCreatedEvent(
+          Map<String, dynamic>.from(raw['conversation'] as Map),
+        ));
+      } catch (_) {}
+    });
+
+    _socket.on('chat:group_updated', (data) {
+      try {
+        final raw = data as Map<String, dynamic>;
+        _events.add(ChatGroupUpdatedEvent(
+          raw['conversationId'] as String,
+          title: raw['title'] as String?,
+        ));
+      } catch (_) {}
+    });
+
+    _socket.on('chat:member_added', (data) {
+      try {
+        final raw = data as Map<String, dynamic>;
+        _events.add(ChatMemberAddedEvent(
+          raw['conversationId'] as String,
+          raw['userId'] as String,
+        ));
+      } catch (_) {}
+    });
+
+    _socket.on('chat:member_removed', (data) {
+      try {
+        final raw = data as Map<String, dynamic>;
+        _events.add(ChatMemberRemovedEvent(
+          raw['conversationId'] as String,
+          raw['userId'] as String,
         ));
       } catch (_) {}
     });

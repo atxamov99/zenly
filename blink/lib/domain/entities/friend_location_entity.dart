@@ -49,6 +49,7 @@ class FriendLocationEntity {
     double? accuracy,
     bool? isOnline,
     String? smartStatus,
+    int? batteryPercent,
     DateTime? lastSeenAt,
   }) {
     return FriendLocationEntity(
@@ -61,7 +62,7 @@ class FriendLocationEntity {
       accuracy: accuracy ?? this.accuracy,
       isOnline: isOnline ?? this.isOnline,
       smartStatus: smartStatus ?? this.smartStatus,
-      batteryPercent: batteryPercent,
+      batteryPercent: batteryPercent ?? this.batteryPercent,
       lastSeenAt: lastSeenAt ?? this.lastSeenAt,
     );
   }

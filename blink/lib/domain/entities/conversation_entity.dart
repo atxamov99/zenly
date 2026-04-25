@@ -11,8 +11,31 @@ class ConversationLastMessage {
   });
 }
 
+class ConversationMember {
+  final String userId;
+  final String username;
+  final String displayName;
+  final String? avatarUrl;
+  final bool isOnline;
+
+  const ConversationMember({
+    required this.userId,
+    required this.username,
+    required this.displayName,
+    this.avatarUrl,
+    this.isOnline = false,
+  });
+}
+
 class ConversationEntity {
   final String id;
+  final bool isGroup;
+  final String title;
+  final String avatarUrl;
+  final String? ownerId;
+  final List<String> adminIds;
+  final List<ConversationMember> members;
+  /// For DMs: the other user's id. For groups: empty string.
   final String otherUserId;
   final ConversationLastMessage? lastMessage;
   final DateTime? lastMessageAt;
@@ -20,6 +43,12 @@ class ConversationEntity {
 
   const ConversationEntity({
     required this.id,
+    this.isGroup = false,
+    this.title = '',
+    this.avatarUrl = '',
+    this.ownerId,
+    this.adminIds = const [],
+    this.members = const [],
     required this.otherUserId,
     this.lastMessage,
     this.lastMessageAt,

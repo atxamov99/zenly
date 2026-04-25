@@ -71,6 +71,56 @@ class _FakeChatRepository implements ChatRepository {
 
   @override
   void emitTypingStop(String friendId) {}
+
+  @override
+  Stream<List<ConversationEntity>> watchGroups() =>
+      Stream.value(const <ConversationEntity>[]);
+
+  @override
+  Stream<List<MessageEntity>> watchGroupMessages(String conversationId) =>
+      Stream.value(const <MessageEntity>[]);
+
+  @override
+  Future<ConversationEntity> createGroup({
+    required String title,
+    required List<String> memberIds,
+  }) =>
+      Completer<ConversationEntity>().future;
+
+  @override
+  Future<MessageEntity> sendGroupText({
+    required String conversationId,
+    required String text,
+  }) =>
+      Completer<MessageEntity>().future;
+
+  @override
+  Future<MessageEntity> sendGroupImage({
+    required String conversationId,
+    required String imagePath,
+  }) =>
+      Completer<MessageEntity>().future;
+
+  @override
+  Future<void> markGroupAsRead(String conversationId) async {}
+
+  @override
+  Future<void> renameGroup({
+    required String conversationId,
+    required String title,
+  }) async {}
+
+  @override
+  Future<void> addGroupMember({
+    required String conversationId,
+    required String userId,
+  }) async {}
+
+  @override
+  Future<void> removeGroupMember({
+    required String conversationId,
+    required String userId,
+  }) async {}
 }
 
 void main() {

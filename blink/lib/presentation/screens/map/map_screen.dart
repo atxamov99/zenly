@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../domain/entities/friend_location_entity.dart';
+import '../../providers/geozone_provider.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/socket_provider.dart';
 import '../../widgets/glass/glass_fab.dart';
@@ -78,8 +79,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Widget build(BuildContext context) {
     final ownLocation = ref.watch(ownLocationProvider);
     final friendsAsync = ref.watch(friendsLocationProvider);
+    final geozonesAsync = ref.watch(geozonesProvider);
 
     final markers = <Marker>[];
+    final circles = <CircleMarker>[];
+
+    geozonesAsync.whenData((zones) {
+      for (final zone in zones) {
+        if (!zone.isActive) continue;
+        circles.add(
+          CircleMarker(
+            point: LatLng(zone.lat, zone.lng),
+            radius: zone.radiusMeters,
+            useRadiusInMeter: true,
+            color: Colors.deepPurple.withValues(alpha: 0.12),
+            borderColor: Colors.deepPurple.withValues(alpha: 0.55),
+            borderStrokeWidth: 1.5,
+          ),
+        );
+        markers.add(
+          Marker(
+            point: LatLng(zone.lat, zone.lng),
+            width: 28,
+            height: 28,
+            child: Center(
+              child: Text(zone.emoji, style: const TextStyle(fontSize: 18)),
+            ),
+          ),
+        );
+      }
+    });
     if (ownLocation != null) {
       markers.add(
         Marker(
@@ -123,6 +152,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.blink.app.blink',
                 ),
+                if (circles.isNotEmpty) CircleLayer(circles: circles),
                 MarkerLayer(markers: markers),
               ],
             ),

@@ -14,6 +14,7 @@ class QrShowDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: GlassSurface(
         blur: GlassTokens.blurThick,
         tintOpacity: 0.55,
@@ -22,12 +23,27 @@ class QrShowDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Mening QR kodim',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Mening QR kodim',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Yopish',
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Container(

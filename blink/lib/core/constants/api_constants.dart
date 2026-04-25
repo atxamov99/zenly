@@ -14,6 +14,7 @@ class ApiConstants {
   static const String profile = '/profile';
   static const String avatar = '/profile/avatar';
   static const String profilePrivacy = '/profile/privacy';
+  static String ghostFrom(String friendId) => '/profile/ghost-from/$friendId';
 
   // Location
   static const String locationUpdate = '/location/update';
@@ -43,4 +44,13 @@ class ApiConstants {
   static String chatRead(String friendId) => '/chats/$friendId/read';
   static String editMessage(String messageId) => '/chats/messages/$messageId';
   static String deleteMessage(String messageId) => '/chats/messages/$messageId';
+
+  // Group chat
+  static const String groups = '/chats/groups';
+  static String groupMessages(String id) => '/chats/groups/$id/messages';
+  static String groupRead(String id) => '/chats/groups/$id/read';
+  static String group(String id) => '/chats/groups/$id';
+  static String groupMembers(String id) => '/chats/groups/$id/members';
+  static String groupMember(String id, String userId) =>
+      '/chats/groups/$id/members/$userId';
 }

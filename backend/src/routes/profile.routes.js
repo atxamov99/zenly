@@ -111,7 +111,12 @@ router.post("/avatar", uploadAvatar.single("avatar"), async (req, res, next) => 
 
 router.patch("/privacy", async (req, res, next) => {
   try {
-    const { locationVisibility, lastSeenVisibility, ghostMode } = req.body;
+    const {
+      locationVisibility,
+      lastSeenVisibility,
+      batteryVisibility,
+      ghostMode
+    } = req.body;
     const allowed = ["friends", "circles", "nobody"];
 
     if (locationVisibility && !allowed.includes(locationVisibility)) {
@@ -120,6 +125,10 @@ router.patch("/privacy", async (req, res, next) => {
 
     if (lastSeenVisibility && !allowed.includes(lastSeenVisibility)) {
       return res.status(400).json({ message: "Invalid lastSeenVisibility value" });
+    }
+
+    if (batteryVisibility && !allowed.includes(batteryVisibility)) {
+      return res.status(400).json({ message: "Invalid batteryVisibility value" });
     }
 
     if (ghostMode !== undefined && typeof ghostMode !== "boolean") {
@@ -136,6 +145,10 @@ router.patch("/privacy", async (req, res, next) => {
       user.privacy.lastSeenVisibility = lastSeenVisibility;
     }
 
+    if (batteryVisibility) {
+      user.privacy.batteryVisibility = batteryVisibility;
+    }
+
     if (typeof ghostMode === "boolean") {
       user.privacy.ghostMode = ghostMode;
     }
@@ -146,6 +159,42 @@ router.patch("/privacy", async (req, res, next) => {
       message: "Privacy settings updated",
       privacy: user.privacy
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Per-friend ghost: hide my location from a specific friend.
+router.put("/ghost-from/:friendId", async (req, res, next) => {
+  try {
+    const mongoose = require("mongoose");
+    const friendId = req.params.friendId;
+    if (!mongoose.isValidObjectId(friendId)) {
+      return res.status(400).json({ message: "Invalid friendId" });
+    }
+    if (friendId === req.user._id.toString()) {
+      return res.status(400).json({ message: "Cannot ghost yourself" });
+    }
+    const user = await User.findById(req.user._id);
+    if (!user.privacy.ghostFromList.some((id) => id.toString() === friendId)) {
+      user.privacy.ghostFromList.push(friendId);
+      await user.save();
+    }
+    res.json({ ghostFromList: user.privacy.ghostFromList });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/ghost-from/:friendId", async (req, res, next) => {
+  try {
+    const friendId = req.params.friendId;
+    const user = await User.findById(req.user._id);
+    user.privacy.ghostFromList = user.privacy.ghostFromList.filter(
+      (id) => id.toString() !== friendId
+    );
+    await user.save();
+    res.json({ ghostFromList: user.privacy.ghostFromList });
   } catch (error) {
     next(error);
   }

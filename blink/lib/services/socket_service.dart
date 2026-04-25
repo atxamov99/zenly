@@ -13,6 +13,8 @@ class SocketService {
   final _presenceController = StreamController<Map<String, dynamic>>.broadcast();
   final _smartStatusController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _batteryController =
+      StreamController<Map<String, dynamic>>.broadcast();
   final _connectionController = StreamController<bool>.broadcast();
   final _notificationController =
       StreamController<Map<String, dynamic>>.broadcast();
@@ -25,6 +27,8 @@ class SocketService {
       _presenceController.stream;
   Stream<Map<String, dynamic>> get onSmartStatusChanged =>
       _smartStatusController.stream;
+  Stream<Map<String, dynamic>> get onBatteryChanged =>
+      _batteryController.stream;
   Stream<bool> get onConnectionChanged => _connectionController.stream;
   Stream<Map<String, dynamic>> get onNotification =>
       _notificationController.stream;
@@ -70,6 +74,11 @@ class SocketService {
           _smartStatusController.add(Map<String, dynamic>.from(data));
         }
       })
+      ..on('friend:battery_changed', (data) {
+        if (data is Map) {
+          _batteryController.add(Map<String, dynamic>.from(data));
+        }
+      })
       ..on('notification:new', (data) {
         if (data is Map) {
           _notificationController.add(Map<String, dynamic>.from(data));
@@ -104,6 +113,7 @@ class SocketService {
     _locationController.close();
     _presenceController.close();
     _smartStatusController.close();
+    _batteryController.close();
     _connectionController.close();
     _notificationController.close();
   }

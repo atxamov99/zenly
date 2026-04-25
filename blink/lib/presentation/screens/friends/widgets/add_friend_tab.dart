@@ -41,9 +41,37 @@ class _AddFriendTabState extends ConsumerState<AddFriendTab> {
     final storage = ref.read(tokenStorageProvider);
     final userId = await storage.getUserId();
     if (userId == null || !mounted) return;
-    showDialog(
+    await showGeneralDialog<void>(
       context: context,
-      builder: (_) => QrShowDialog(username: userId),
+      barrierLabel: 'QR oynasini yopish',
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.28),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) => QrShowDialog(username: userId),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0, end: 1).animate(curved),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.06),
+              end: Offset.zero,
+            ).animate(curved),
+            child: ScaleTransition(
+              scale: Tween<double>(
+                begin: 0.94,
+                end: 1,
+              ).animate(curved),
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 

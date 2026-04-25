@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/glass_tokens.dart';
 import '../../../../domain/entities/message_entity.dart';
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends StatefulWidget {
   final MessageEntity message;
   final bool isMine;
   final String friendId;
@@ -22,17 +24,32 @@ class MessageBubble extends StatelessWidget {
   });
 
   @override
+  State<MessageBubble> createState() => _MessageBubbleState();
+}
+
+class _MessageBubbleState extends State<MessageBubble> {
+  final FocusNode _imageFocusNode = FocusNode(debugLabel: 'chat-image-bubble');
+  bool _isImageFocused = false;
+
+  @override
+  void dispose() {
+    _imageFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDeleted = message.deletedAt != null;
-    final align = isMine ? Alignment.centerRight : Alignment.centerLeft;
-    final bg = isMine
+    final isDeleted = widget.message.deletedAt != null;
+    final align =
+        widget.isMine ? Alignment.centerRight : Alignment.centerLeft;
+    final bg = widget.isMine
         ? GlassTokens.tintProminent
         : Colors.white.withOpacity(0.85);
 
     return Align(
       alignment: align,
       child: GestureDetector(
-        onLongPress: isDeleted ? null : onLongPress,
+        onLongPress: isDeleted ? null : widget.onLongPress,
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.75,
@@ -53,7 +70,7 @@ class MessageBubble extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (isDeleted) ..._deleted()
-                else if (message.type == 'image') ..._image(context)
+                else if (widget.message.type == 'image') ..._image(context)
                 else _text(),
                 const SizedBox(height: 4),
                 _meta(),
@@ -66,23 +83,52 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _text() => Text(
-        message.text,
+        widget.message.text,
         style: const TextStyle(color: Colors.black87, fontSize: 15),
       );
 
   List<Widget> _image(BuildContext context) => [
-        GestureDetector(
-          onTap: onImageTap,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(GlassTokens.radiusCard - 4),
-            child: CachedNetworkImage(
-              imageUrl: _imageUrlFull(),
-              width: 220,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => const SizedBox(
-                width: 220,
-                height: 220,
-                child: Center(child: CircularProgressIndicator()),
+        FocusableActionDetector(
+          focusNode: _imageFocusNode,
+          mouseCursor: SystemMouseCursors.click,
+          onShowFocusHighlight: (value) {
+            if (_isImageFocused == value) return;
+            setState(() => _isImageFocused = value);
+          },
+          child: GestureDetector(
+            onTap: () {
+              if (_supportsKeyboardPreview) {
+                _imageFocusNode.requestFocus();
+                return;
+              }
+              widget.onImageTap?.call();
+            },
+            onDoubleTap: widget.onImageTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(GlassTokens.radiusCard - 4),
+                border: Border.all(
+                  color: _isImageFocused
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(GlassTokens.radiusCard - 4),
+                child: CachedNetworkImage(
+                  imageUrl: _imageUrlFull(),
+                  width: 220,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => const SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
               ),
             ),
           ),
@@ -101,15 +147,15 @@ class MessageBubble extends StatelessWidget {
       ];
 
   Widget _meta() {
-    final hh = message.createdAt.hour.toString().padLeft(2, '0');
-    final mm = message.createdAt.minute.toString().padLeft(2, '0');
+    final hh = widget.message.createdAt.hour.toString().padLeft(2, '0');
+    final mm = widget.message.createdAt.minute.toString().padLeft(2, '0');
     final time = '$hh:$mm';
-    final isReadByFriend = message.isReadBy(friendId);
+    final isReadByFriend = widget.message.isReadBy(widget.friendId);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (message.editedAt != null && message.deletedAt == null)
+        if (widget.message.editedAt != null && widget.message.deletedAt == null)
           const Padding(
             padding: EdgeInsets.only(right: 6),
             child: Text(
@@ -119,7 +165,7 @@ class MessageBubble extends StatelessWidget {
           ),
         Text(time,
             style: const TextStyle(fontSize: 11, color: Colors.black54)),
-        if (isMine && message.deletedAt == null) ...[
+        if (widget.isMine && widget.message.deletedAt == null) ...[
           const SizedBox(width: 4),
           if (isReadByFriend)
             const Icon(Icons.done_all,
@@ -137,8 +183,24 @@ class MessageBubble extends StatelessWidget {
   }
 
   String _imageUrlFull() {
-    if (message.imageUrl.startsWith('http')) return message.imageUrl;
+    if (widget.message.imageUrl.startsWith('http')) {
+      return widget.message.imageUrl;
+    }
     final host = ApiConstants.socketUrl; // host without /api suffix
-    return '$host${message.imageUrl}';
+    return '$host${widget.message.imageUrl}';
+  }
+
+  bool get _supportsKeyboardPreview {
+    if (kIsWeb) return true;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+        return true;
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        return false;
+    }
   }
 }

@@ -3,6 +3,18 @@ const mongoose = require("mongoose");
 
 const conversationSchema = new mongoose.Schema(
   {
+    isGroup: { type: Boolean, default: false, index: true },
+    title: { type: String, default: "", trim: true, maxlength: 80 },
+    avatarUrl: { type: String, default: "" },
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
+    adminIds: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: []
+    },
     participants: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
       required: true,
@@ -20,8 +32,11 @@ const conversationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Unique compound index on sorted participants — guarantees a single
-// conversation document per pair, regardless of insert order.
-conversationSchema.index({ participants: 1 }, { unique: true });
+// Unique compound index for DMs only — multiple groups with the same
+// members are allowed, but only one DM per pair.
+conversationSchema.index(
+  { participants: 1 },
+  { unique: true, partialFilterExpression: { isGroup: false } }
+);
 
 module.exports = mongoose.model("Conversation", conversationSchema);
