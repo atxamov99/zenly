@@ -44,6 +44,16 @@ const userSchema = new mongoose.Schema(
         type: String,
         enum: ["offline", "home", "study", "work", "on_the_way", "idle", "custom_place"],
         default: "offline"
+      },
+      batteryPercent: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: null
+      },
+      batteryUpdatedAt: {
+        type: Date,
+        default: null
       }
     },
     privacy: {
@@ -57,9 +67,18 @@ const userSchema = new mongoose.Schema(
         enum: ["friends", "circles", "nobody"],
         default: "friends"
       },
+      batteryVisibility: {
+        type: String,
+        enum: ["friends", "circles", "nobody"],
+        default: "friends"
+      },
       ghostMode: {
         type: Boolean,
         default: false
+      },
+      ghostFromList: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        default: []
       }
     }
   },

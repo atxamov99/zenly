@@ -72,3 +72,14 @@ final typingProvider =
     StreamProvider.family<bool, String>((ref, friendId) {
   return ref.watch(chatRepositoryProvider).watchTyping(friendId);
 });
+
+// ─── Group chat providers ──────────────────────────────────────────
+
+final groupsProvider = StreamProvider<List<ConversationEntity>>((ref) {
+  return ref.watch(chatRepositoryProvider).watchGroups();
+});
+
+final groupMessagesProvider =
+    StreamProvider.family<List<MessageEntity>, String>((ref, conversationId) {
+  return ref.watch(chatRepositoryProvider).watchGroupMessages(conversationId);
+});

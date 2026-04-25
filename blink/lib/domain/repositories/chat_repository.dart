@@ -47,4 +47,44 @@ abstract class ChatRepository {
     required DateTime before,
     int limit = 30,
   });
+
+  // ─── Group chat ──────────────────────────────────────────────────
+
+  /// Live stream of all groups the user belongs to.
+  Stream<List<ConversationEntity>> watchGroups();
+
+  /// Live stream of messages for a single group (REST seed + socket updates).
+  Stream<List<MessageEntity>> watchGroupMessages(String conversationId);
+
+  Future<ConversationEntity> createGroup({
+    required String title,
+    required List<String> memberIds,
+  });
+
+  Future<MessageEntity> sendGroupText({
+    required String conversationId,
+    required String text,
+  });
+
+  Future<MessageEntity> sendGroupImage({
+    required String conversationId,
+    required String imagePath,
+  });
+
+  Future<void> markGroupAsRead(String conversationId);
+
+  Future<void> renameGroup({
+    required String conversationId,
+    required String title,
+  });
+
+  Future<void> addGroupMember({
+    required String conversationId,
+    required String userId,
+  });
+
+  Future<void> removeGroupMember({
+    required String conversationId,
+    required String userId,
+  });
 }

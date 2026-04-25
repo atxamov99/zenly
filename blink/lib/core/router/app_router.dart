@@ -5,7 +5,13 @@ import '../../domain/entities/friend_entity.dart';
 import '../../presentation/providers/auth_provider.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
+import '../../domain/entities/conversation_entity.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
+import '../../presentation/screens/chat/group_chat_screen.dart';
+import '../../presentation/screens/chat/group_settings_screen.dart';
+import '../../presentation/screens/chat/new_group_screen.dart';
+import '../../presentation/screens/geozones/geozones_screen.dart';
+import '../../presentation/screens/geozones/new_geozone_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_shell.dart';
 import '../../presentation/screens/map/map_screen.dart';
@@ -24,6 +30,14 @@ class AppRoutes {
   static const main = '/main';
   static const chat = '/chat';
   static String chatFor(String friendId) => '/chat/$friendId';
+  static const newGroup = '/new-group';
+  static const group = '/group';
+  static String groupFor(String conversationId) => '/group/$conversationId';
+  static const groupSettings = '/group-settings';
+  static String groupSettingsFor(String conversationId) =>
+      '/group-settings/$conversationId';
+  static const geozones = '/geozones';
+  static const newGeozone = '/new-geozone';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -100,6 +114,42 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return ChatScreen(friend: friend);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.newGroup,
+        builder: (_, __) => const NewGroupScreen(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.group}/:id',
+        builder: (context, state) {
+          final group = state.extra as ConversationEntity?;
+          if (group == null) {
+            return const Scaffold(
+              body: Center(child: Text('Group not provided')),
+            );
+          }
+          return GroupChatScreen(group: group);
+        },
+      ),
+      GoRoute(
+        path: '${AppRoutes.groupSettings}/:id',
+        builder: (context, state) {
+          final group = state.extra as ConversationEntity?;
+          if (group == null) {
+            return const Scaffold(
+              body: Center(child: Text('Group not provided')),
+            );
+          }
+          return GroupSettingsScreen(group: group);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.geozones,
+        builder: (_, __) => const GeozonesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.newGeozone,
+        builder: (_, __) => const NewGeozoneScreen(),
       ),
     ],
   );

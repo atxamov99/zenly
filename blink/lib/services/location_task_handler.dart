@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
@@ -44,6 +45,13 @@ class LocationTaskHandler extends TaskHandler {
         return;
       }
 
+      int? batteryPercent;
+      try {
+        batteryPercent = await Battery().batteryLevel;
+      } catch (_) {
+        batteryPercent = null;
+      }
+
       final response = await http.post(
         Uri.parse('${ApiConstants.baseUrl}${ApiConstants.locationUpdate}'),
         headers: {
@@ -54,6 +62,7 @@ class LocationTaskHandler extends TaskHandler {
           'lat': position.latitude,
           'lng': position.longitude,
           'accuracy': position.accuracy,
+          if (batteryPercent != null) 'batteryPercent': batteryPercent,
         }),
       );
 

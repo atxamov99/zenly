@@ -20,6 +20,7 @@ class FriendsLocationNotifier
   StreamSubscription<Map<String, dynamic>>? _locationSub;
   StreamSubscription<Map<String, dynamic>>? _smartStatusSub;
   StreamSubscription<Map<String, dynamic>>? _presenceSub;
+  StreamSubscription<Map<String, dynamic>>? _batterySub;
 
   @override
   Future<Map<String, FriendLocationEntity>> build() async {
@@ -27,12 +28,14 @@ class FriendsLocationNotifier
       _locationSub?.cancel();
       _smartStatusSub?.cancel();
       _presenceSub?.cancel();
+      _batterySub?.cancel();
     });
 
     final socket = ref.read(socketServiceProvider);
     _locationSub = socket.onLocationChanged.listen(_handleLocationEvent);
     _smartStatusSub = socket.onSmartStatusChanged.listen(_handleSmartStatusEvent);
     _presenceSub = socket.onPresenceChanged.listen(_handlePresenceEvent);
+    _batterySub = socket.onBatteryChanged.listen(_handleBatteryEvent);
 
     final ds = ref.read(apiLocationDatasourceProvider);
     final friends = await ds.getVisibleFriends();
@@ -94,6 +97,20 @@ class FriendsLocationNotifier
       lastSeenAt: data['lastSeenAt'] != null
           ? DateTime.tryParse(data['lastSeenAt'].toString())
           : friend.lastSeenAt,
+    );
+    state = AsyncData({...current, friendId: updated});
+  }
+
+  void _handleBatteryEvent(Map<String, dynamic> data) {
+    final friendId = data['friendId']?.toString();
+    if (friendId == null) return;
+    final current = state.value;
+    if (current == null) return;
+    final friend = current[friendId];
+    if (friend == null) return;
+
+    final updated = friend.copyWith(
+      batteryPercent: (data['batteryPercent'] as num?)?.toInt(),
     );
     state = AsyncData({...current, friendId: updated});
   }

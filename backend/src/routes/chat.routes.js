@@ -50,9 +50,319 @@ router.get("/", async (req, res, next) => {
   try {
     const userId = req.user._id;
     const conversations = await Conversation.find({ participants: userId })
+      .populate(
+        "participants",
+        "username displayName avatarUrl presence"
+      )
       .sort({ lastMessageAt: -1 })
       .lean();
     res.json({ conversations });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── Group chat endpoints ────────────────────────────────────────────
+
+router.post("/groups", async (req, res, next) => {
+  try {
+    const { title, memberIds } = req.body;
+    if (typeof title !== "string" || !title.trim()) {
+      return res.status(400).json({ message: "title required" });
+    }
+    if (!Array.isArray(memberIds) || memberIds.length < 1) {
+      return res.status(400).json({ message: "at least one memberId required" });
+    }
+    const normalized = memberIds
+      .filter((id) => mongoose.isValidObjectId(id))
+      .map((id) => id.toString());
+    const userIdStr = req.user._id.toString();
+    const participants = Array.from(new Set([userIdStr, ...normalized]));
+    if (participants.length < 2) {
+      return res.status(400).json({ message: "need >=2 participants" });
+    }
+
+    // All non-self members must be friends with creator.
+    for (const memberId of normalized) {
+      if (memberId === userIdStr) continue;
+      const ok = await Friendship.findOne({
+        status: "accepted",
+        $or: [
+          { requester: userIdStr, recipient: memberId },
+          { requester: memberId, recipient: userIdStr }
+        ]
+      });
+      if (!ok) {
+        return res
+          .status(403)
+          .json({ message: `Not friends with ${memberId}` });
+      }
+    }
+
+    const conv = await Conversation.create({
+      isGroup: true,
+      title: title.trim(),
+      ownerId: req.user._id,
+      adminIds: [req.user._id],
+      participants,
+      unread: {}
+    });
+
+    const populated = await Conversation.findById(conv._id)
+      .populate(
+        "participants",
+        "username displayName avatarUrl presence"
+      )
+      .lean();
+
+    // Notify all members so their chat list updates.
+    const io = require("../sockets").getIo();
+    for (const userId of participants) {
+      io.to(`user:${userId}`).emit("chat:group_created", {
+        conversation: populated
+      });
+    }
+
+    res.status(201).json({ conversation: populated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/groups/:id/messages", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid conversation id" });
+    }
+    const userId = req.user._id;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 30, 100);
+    const before = req.query.before ? new Date(req.query.before) : null;
+
+    const conversation = await Conversation.findOne({
+      _id: req.params.id,
+      isGroup: true,
+      participants: userId
+    });
+    if (!conversation) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    const filter = { conversationId: conversation._id };
+    if (before) filter.createdAt = { $lt: before };
+
+    const messages = await Message.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    res.json({ messages, conversation });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post(
+  "/groups/:id/messages",
+  uploadMessageImage.single("image"),
+  async (req, res, next) => {
+    try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: "Invalid conversation id" });
+      }
+      const userId = req.user._id;
+      const conversation = await Conversation.findOne({
+        _id: req.params.id,
+        isGroup: true,
+        participants: userId
+      });
+      if (!conversation) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+
+      const type = req.body.type === "image" ? "image" : "text";
+      const text = typeof req.body.text === "string" ? req.body.text : "";
+      const imageUrl = req.file ? `/uploads/messages/${req.file.filename}` : "";
+
+      if (type === "text" && !text.trim()) {
+        return res.status(400).json({ message: "text required for text message" });
+      }
+      if (type === "image" && !imageUrl) {
+        return res.status(400).json({ message: "image file required" });
+      }
+
+      const message = await Message.create({
+        conversationId: conversation._id,
+        senderId: userId,
+        type,
+        text: type === "text" ? text : "",
+        imageUrl
+      });
+
+      const previewText = type === "text" ? text : "";
+      conversation.lastMessage = {
+        text: previewText,
+        type,
+        senderId: userId,
+        createdAt: message.createdAt
+      };
+      conversation.lastMessageAt = message.createdAt;
+      // Increment unread for all participants except the sender.
+      for (const participantId of conversation.participants) {
+        const pid = participantId.toString();
+        if (pid === userId.toString()) continue;
+        const current = conversation.unread.get(pid) ?? 0;
+        conversation.unread.set(pid, current + 1);
+      }
+      await conversation.save();
+
+      emitMessage(conversation.toObject(), message.toObject());
+
+      res.status(201).json({ message, conversation });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post("/groups/:id/read", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid conversation id" });
+    }
+    const userId = req.user._id;
+    const conversation = await Conversation.findOne({
+      _id: req.params.id,
+      isGroup: true,
+      participants: userId
+    });
+    if (!conversation) return res.status(404).json({ message: "Group not found" });
+
+    const readAt = new Date();
+    const result = await Message.updateMany(
+      {
+        conversationId: conversation._id,
+        senderId: { $ne: userId },
+        "readBy.userId": { $ne: userId }
+      },
+      { $push: { readBy: { userId, readAt } } }
+    );
+    conversation.unread.set(userId.toString(), 0);
+    await conversation.save();
+
+    emitRead({
+      conversationId: conversation._id,
+      readerId: userId,
+      participants: conversation.participants,
+      readAt
+    });
+    res.json({ updated: result.modifiedCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch("/groups/:id", async (req, res, next) => {
+  try {
+    const { title } = req.body;
+    if (typeof title !== "string" || !title.trim()) {
+      return res.status(400).json({ message: "title required" });
+    }
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv || !conv.isGroup) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    const userIdStr = req.user._id.toString();
+    const isAdmin =
+      conv.ownerId?.toString() === userIdStr ||
+      conv.adminIds.some((id) => id.toString() === userIdStr);
+    if (!isAdmin) {
+      return res.status(403).json({ message: "Only admins can rename" });
+    }
+    conv.title = title.trim();
+    await conv.save();
+    const io = require("../sockets").getIo();
+    for (const p of conv.participants) {
+      io.to(`user:${p.toString()}`).emit("chat:group_updated", {
+        conversationId: conv._id.toString(),
+        title: conv.title
+      });
+    }
+    res.json({ conversation: conv });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/groups/:id/members", async (req, res, next) => {
+  try {
+    const { userId: newMemberId } = req.body;
+    if (!mongoose.isValidObjectId(newMemberId)) {
+      return res.status(400).json({ message: "Invalid userId" });
+    }
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv || !conv.isGroup) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    const userIdStr = req.user._id.toString();
+    const isAdmin =
+      conv.ownerId?.toString() === userIdStr ||
+      conv.adminIds.some((id) => id.toString() === userIdStr);
+    if (!isAdmin) {
+      return res.status(403).json({ message: "Only admins can add members" });
+    }
+    if (conv.participants.some((p) => p.toString() === newMemberId)) {
+      return res.status(409).json({ message: "Already a member" });
+    }
+    conv.participants.push(newMemberId);
+    await conv.save();
+    const io = require("../sockets").getIo();
+    for (const p of conv.participants) {
+      io.to(`user:${p.toString()}`).emit("chat:member_added", {
+        conversationId: conv._id.toString(),
+        userId: newMemberId
+      });
+    }
+    res.status(201).json({ conversation: conv });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/groups/:id/members/:userId", async (req, res, next) => {
+  try {
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv || !conv.isGroup) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    const userIdStr = req.user._id.toString();
+    const targetId = req.params.userId;
+    const isOwner = conv.ownerId?.toString() === userIdStr;
+    const isSelf = targetId === userIdStr;
+    if (!isOwner && !isSelf) {
+      return res
+        .status(403)
+        .json({ message: "Only owner can kick; you can leave yourself" });
+    }
+    if (isOwner && targetId === userIdStr) {
+      return res
+        .status(400)
+        .json({ message: "Owner cannot leave; transfer ownership first" });
+    }
+    conv.participants = conv.participants.filter(
+      (p) => p.toString() !== targetId
+    );
+    conv.adminIds = conv.adminIds.filter((p) => p.toString() !== targetId);
+    await conv.save();
+
+    const io = require("../sockets").getIo();
+    const recipients = [...conv.participants.map((p) => p.toString()), targetId];
+    for (const p of recipients) {
+      io.to(`user:${p}`).emit("chat:member_removed", {
+        conversationId: conv._id.toString(),
+        userId: targetId
+      });
+    }
+    res.json({ conversation: conv });
   } catch (err) {
     next(err);
   }
