@@ -1,5 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/glass_tokens.dart';
 
 import '../../../widgets/glass/glass_app_bar.dart';
 
@@ -53,7 +54,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   style: const TextStyle(fontSize: 15)),
               Text(subtitle,
                   style: const TextStyle(
-                      fontSize: 11, color: Colors.black54)),
+                      fontSize: 11, color: GlassTokens.onGlassMuted)),
             ],
           ),
         ],

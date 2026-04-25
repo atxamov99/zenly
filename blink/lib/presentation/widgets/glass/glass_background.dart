@@ -16,9 +16,9 @@ class GlassBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFE9F2FF),
-            Color(0xFFF6E9FF),
-            Color(0xFFFFF1E6),
+            Color(0xFF0D1117),
+            Color(0xFF1A1035),
+            Color(0xFF0A1F3D),
           ],
           stops: [0.0, 0.55, 1.0],
         ),

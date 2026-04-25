@@ -33,6 +33,11 @@ class GlassTokens {
   static const double capsuleHorizontalMargin = 16;
   static const double capsuleBottomGap = 12;
 
+  // Text on dark glass
+  static const Color onGlass = Color(0xF2FFFFFF);      // 95% white — sarlavha
+  static const Color onGlassMuted = Color(0xB3FFFFFF);  // 70% white — ikkinchi daraja
+  static const Color onGlassFaint = Color(0x73FFFFFF);  // 45% white — hint/disabled
+
   // Spring physics
   static const Cubic spring = Cubic(0.32, 0.72, 0, 1);
   static const Duration springDuration = Duration(milliseconds: 450);

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/theme/glass_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -55,7 +56,7 @@ class GeozonesScreen extends ConsumerWidget {
                         const Text(
                           "Uy, ish, maktab — joylaringizni belgilash do'stlarga 'qayerda?' deb yozishni qisqartiradi.",
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.black54),
+                          style: TextStyle(color: GlassTokens.onGlassMuted),
                         ),
                         const SizedBox(height: 24),
                         FilledButton.icon(
@@ -118,7 +119,7 @@ class _GeozoneTile extends ConsumerWidget {
                   '${geozone.radiusMeters.round()}m radius · '
                   '${geozone.notifyViewerIds.length} kuzatuvchi',
                   style:
-                      const TextStyle(fontSize: 12, color: Colors.black54),
+                      const TextStyle(fontSize: 12, color: GlassTokens.onGlassMuted),
                 ),
               ],
             ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/glass_tokens.dart';
@@ -50,8 +50,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       ),
       indicatorSize: TabBarIndicatorSize.tab,
       indicatorPadding: const EdgeInsets.symmetric(vertical: 4),
-      labelColor: Colors.black87,
-      unselectedLabelColor: Colors.black54,
+      labelColor: GlassTokens.onGlass,
+      unselectedLabelColor: GlassTokens.onGlassMuted,
       labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
       unselectedLabelStyle:
           const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),

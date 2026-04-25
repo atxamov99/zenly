@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../../core/theme/glass_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -57,7 +58,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
           ),
           if (_processing)
             const ColoredBox(
-              color: Colors.black54,
+              color: GlassTokens.onGlassMuted,
               child: Center(child: CircularProgressIndicator()),
             ),
         ],

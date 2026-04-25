@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,7 +84,7 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   Widget _text() => Text(
         widget.message.text,
-        style: const TextStyle(color: Colors.black87, fontSize: 15),
+        style: const TextStyle(color: GlassTokens.onGlass, fontSize: 15),
       );
 
   List<Widget> _image(BuildContext context) => [
@@ -139,7 +139,7 @@ class _MessageBubbleState extends State<MessageBubble> {
         Text(
           "🚫 Bu xabar o'chirildi",
           style: TextStyle(
-            color: Colors.black45,
+            color: GlassTokens.onGlassFaint,
             fontStyle: FontStyle.italic,
             fontSize: 14,
           ),
@@ -160,11 +160,11 @@ class _MessageBubbleState extends State<MessageBubble> {
             padding: EdgeInsets.only(right: 6),
             child: Text(
               '(tahrirlandi)',
-              style: TextStyle(fontSize: 10, color: Colors.black45),
+              style: TextStyle(fontSize: 10, color: GlassTokens.onGlassFaint),
             ),
           ),
         Text(time,
-            style: const TextStyle(fontSize: 11, color: Colors.black54)),
+            style: const TextStyle(fontSize: 11, color: GlassTokens.onGlassMuted)),
         if (widget.isMine && widget.message.deletedAt == null) ...[
           const SizedBox(width: 4),
           if (isReadByFriend)
@@ -176,7 +176,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             const Icon(Icons.done,
                 key: ValueKey('msg-status-delivered'),
                 size: 14,
-                color: Colors.black45),
+                color: GlassTokens.onGlassFaint),
         ],
       ],
     );

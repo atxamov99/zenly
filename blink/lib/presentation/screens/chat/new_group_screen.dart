@@ -1,5 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../core/theme/glass_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -105,7 +106,7 @@ class _NewGroupScreenState extends ConsumerState<NewGroupScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "${_selected.length} ta tanlandi",
-                      style: const TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: GlassTokens.onGlassMuted),
                     ),
                   ),
                 ),

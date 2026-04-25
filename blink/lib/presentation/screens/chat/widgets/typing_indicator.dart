@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../../core/theme/glass_tokens.dart';
 
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
@@ -47,7 +48,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
                     width: 6,
                     height: 6,
                     decoration: const BoxDecoration(
-                      color: Colors.black54,
+                      color: GlassTokens.onGlassMuted,
                       shape: BoxShape.circle,
                     ),
                   ),

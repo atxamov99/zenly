@@ -1,5 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/glass_tokens.dart';
 
 import '../../../../domain/entities/conversation_entity.dart';
 import '../../../../domain/entities/friend_entity.dart';
@@ -88,7 +89,7 @@ class FriendTile extends StatelessWidget {
                         Text(
                           _formatTime(conversation!.lastMessageAt!),
                           style: const TextStyle(
-                              fontSize: 11, color: Colors.black54),
+                              fontSize: 11, color: GlassTokens.onGlassMuted),
                         ),
                     ],
                   ),
@@ -101,8 +102,8 @@ class FriendTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             color: unread > 0
-                                ? Colors.black87
-                                : Colors.black54,
+                                ? GlassTokens.onGlass
+                                : GlassTokens.onGlassMuted,
                             fontWeight: unread > 0
                                 ? FontWeight.w600
                                 : FontWeight.normal,

@@ -1,6 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/glass_tokens.dart';
 
 import 'glass/glass_surface.dart';
 
@@ -55,16 +56,16 @@ class InAppBanner {
                         Text(title,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87)),
+                                color: GlassTokens.onGlass)),
                         if (subtitle != null && subtitle.isNotEmpty)
                           Text(subtitle,
                               style: const TextStyle(
-                                  fontSize: 12, color: Colors.black54)),
+                                  fontSize: 12, color: GlassTokens.onGlassMuted)),
                       ],
                     ),
                   ),
                   const IconButton(
-                    icon: Icon(Icons.close, size: 18, color: Colors.black54),
+                    icon: Icon(Icons.close, size: 18, color: GlassTokens.onGlassMuted),
                     onPressed: InAppBanner.dismiss,
                   ),
                 ],

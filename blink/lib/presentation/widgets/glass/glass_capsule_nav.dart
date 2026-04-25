@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../core/theme/glass_tokens.dart';
 import 'glass_surface.dart';
@@ -134,7 +134,7 @@ class _NavTab extends StatelessWidget {
                 active ? item.activeIcon : item.icon,
                 key: ValueKey(active),
                 size: 26,
-                color: active ? Colors.black87 : Colors.black54,
+                color: active ? GlassTokens.onGlass : GlassTokens.onGlassMuted,
               ),
             ),
             if (item.badgeCount > 0)

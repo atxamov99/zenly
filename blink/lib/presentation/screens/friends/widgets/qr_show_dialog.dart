@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/theme/glass_tokens.dart';
@@ -31,7 +31,7 @@ class QrShowDialog extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: GlassTokens.onGlass,
                     ),
                   ),
                 ),
@@ -40,7 +40,7 @@ class QrShowDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(
                     Icons.close_rounded,
-                    color: Colors.black87,
+                    color: GlassTokens.onGlass,
                   ),
                 ),
               ],
@@ -64,7 +64,7 @@ class QrShowDialog extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87),
+                  color: GlassTokens.onGlass),
             ),
             const SizedBox(height: 16),
             TextButton(

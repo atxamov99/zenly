@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../core/theme/glass_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,7 +73,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
               Text(widget.group.title, style: const TextStyle(fontSize: 16)),
               Text(
                 '${widget.group.members.length} a\'zo',
-                style: const TextStyle(fontSize: 11, color: Colors.black54),
+                style: const TextStyle(fontSize: 11, color: GlassTokens.onGlassMuted),
               ),
             ],
           ),
@@ -129,7 +130,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black54,
+                                    color: GlassTokens.onGlassMuted,
                                   ),
                                 ),
                               ),

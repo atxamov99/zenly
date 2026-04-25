@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../core/theme/glass_tokens.dart';
 import 'glass_card.dart';
@@ -31,7 +31,7 @@ class GlassEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: Colors.black54),
+            Icon(icon, size: 48, color: GlassTokens.onGlassMuted),
             const SizedBox(height: 12),
             Text(
               title,
@@ -39,7 +39,7 @@ class GlassEmptyState extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: GlassTokens.onGlass,
               ),
             ),
             if (detail != null) ...[
@@ -47,7 +47,7 @@ class GlassEmptyState extends StatelessWidget {
               Text(
                 detail!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                style: const TextStyle(fontSize: 12, color: GlassTokens.onGlassMuted),
               ),
             ],
             if (onRetry != null) ...[
@@ -56,7 +56,7 @@ class GlassEmptyState extends StatelessWidget {
                 onPressed: onRetry,
                 style: FilledButton.styleFrom(
                   backgroundColor: GlassTokens.tintProminent,
-                  foregroundColor: Colors.black87,
+                  foregroundColor: GlassTokens.onGlass,
                 ),
                 icon: const Icon(Icons.refresh),
                 label: Text(retryLabel ?? "Qayta urinib ko'rish"),

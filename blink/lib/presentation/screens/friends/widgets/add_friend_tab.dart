@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,15 +116,15 @@ class _AddFriendTabState extends ConsumerState<AddFriendTab> {
             child: TextField(
               controller: _searchCtrl,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.black54),
+                prefixIcon: Icon(Icons.search, color: GlassTokens.onGlassMuted),
                 hintText: 'Username qidiring',
-                hintStyle: TextStyle(color: Colors.black45),
+                hintStyle: TextStyle(color: GlassTokens.onGlassFaint),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 isDense: true,
               ),
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: GlassTokens.onGlass),
               onChanged: _onSearchChanged,
             ),
           ),
@@ -140,11 +140,11 @@ class _AddFriendTabState extends ConsumerState<AddFriendTab> {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.qr_code, size: 18, color: Colors.black87),
+                      Icon(Icons.qr_code, size: 18, color: GlassTokens.onGlass),
                       SizedBox(width: 8),
                       Text("QR ko'rsatish",
                           style: TextStyle(
-                              color: Colors.black87,
+                              color: GlassTokens.onGlass,
                               fontWeight: FontWeight.w600)),
                     ],
                   ),
@@ -161,11 +161,11 @@ class _AddFriendTabState extends ConsumerState<AddFriendTab> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.qr_code_scanner,
-                          size: 18, color: Colors.black87),
+                          size: 18, color: GlassTokens.onGlass),
                       SizedBox(width: 8),
                       Text('Skanerlash',
                           style: TextStyle(
-                              color: Colors.black87,
+                              color: GlassTokens.onGlass,
                               fontWeight: FontWeight.w600)),
                     ],
                   ),

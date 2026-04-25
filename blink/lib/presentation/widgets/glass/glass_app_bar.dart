@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../core/theme/glass_tokens.dart';
 import 'glass_surface.dart';
@@ -38,7 +38,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: GlassTokens.onGlass,
           ),
           child: title,
         ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../core/theme/glass_tokens.dart';
 import 'glass_surface.dart';
@@ -30,7 +30,7 @@ class GlassFab extends StatelessWidget {
             onTap: onPressed,
             borderRadius: BorderRadius.circular(size / 2),
             child: Center(
-              child: Icon(icon, color: Colors.black87, size: 24),
+              child: Icon(icon, color: GlassTokens.onGlass, size: 24),
             ),
           ),
         ),

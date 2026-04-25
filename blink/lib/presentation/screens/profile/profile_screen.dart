@@ -7,6 +7,7 @@ import '../../../core/router/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../../core/theme/glass_tokens.dart';
 import '../../widgets/glass/glass_background.dart';
 import '../../widgets/glass/glass_card.dart';
 import '../../widgets/glass/glass_empty_state.dart';
@@ -60,7 +61,7 @@ class ProfileScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 48,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: const Color(0x33FFFFFF),
                             backgroundImage: user.photoUrl.isNotEmpty
                                 ? CachedNetworkImageProvider(user.photoUrl)
                                 : null,
@@ -82,7 +83,7 @@ class ProfileScreen extends ConsumerWidget {
                           Text('@${user.username}'),
                           if (user.email.isNotEmpty)
                             Text(user.email,
-                                style: const TextStyle(color: Colors.grey)),
+                                style: TextStyle(color: GlassTokens.onGlassMuted)),
                         ],
                       ),
                     ),

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import '../../../../core/theme/glass_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -204,7 +205,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: Colors.black54,
+          color: GlassTokens.onGlassMuted,
           letterSpacing: 0.5,
         ),
       ),
@@ -250,7 +251,7 @@ class _GroupTile extends StatelessWidget {
                       Text(
                         _formatTime(group.lastMessageAt!),
                         style: const TextStyle(
-                            fontSize: 11, color: Colors.black54),
+                            fontSize: 11, color: GlassTokens.onGlassMuted),
                       ),
                   ],
                 ),
@@ -263,8 +264,8 @@ class _GroupTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: group.unreadCount > 0
-                              ? Colors.black87
-                              : Colors.black54,
+                              ? GlassTokens.onGlass
+                              : GlassTokens.onGlassMuted,
                           fontWeight: group.unreadCount > 0
                               ? FontWeight.w600
                               : FontWeight.normal,
