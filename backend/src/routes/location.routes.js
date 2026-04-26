@@ -15,7 +15,8 @@ const { canViewerAccessByRule } = require("../utils/visibility");
 const { isInsideGeozone } = require("../utils/geo");
 const { createNotification } = require("../utils/notifications");
 const { resolveSmartStatus } = require("../utils/smart-status");
-const { getIo } = require("../sockets");
+const socketModule = require("../sockets");
+const getIo = () => socketModule.getIo();
 
 const router = express.Router();
 
@@ -95,6 +96,22 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
       $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }]
     }).select("viewer");
 
+    const geozones = await Geozone.find({
+      owner: req.user._id,
+      isActive: true
+    });
+
+    const previousSmartStatus = owner.presence?.smartStatus || "offline";
+    const nextSmartStatus = resolveSmartStatus({
+      isOnline: true,
+      geozones,
+      point: { lat: roundedLat, lng: roundedLng },
+      previousLocation,
+      nextLocation: location
+    });
+
+    owner.presence.smartStatus = nextSmartStatus;
+
     const io = getIo();
     const ghostFromIds = new Set(
       (owner.privacy?.ghostFromList || []).map((id) => id.toString())
@@ -157,22 +174,6 @@ router.post("/update", locationUpdateLimiter, async (req, res, next) => {
         }
       }
     }
-
-    const geozones = await Geozone.find({
-      owner: req.user._id,
-      isActive: true
-    });
-
-    const previousSmartStatus = owner.presence?.smartStatus || "offline";
-    const nextSmartStatus = resolveSmartStatus({
-      isOnline: true,
-      geozones,
-      point: { lat: roundedLat, lng: roundedLng },
-      previousLocation,
-      nextLocation: location
-    });
-
-    owner.presence.smartStatus = nextSmartStatus;
     owner.presence.lastSeenAt = locationTimestamp;
     await owner.save();
 

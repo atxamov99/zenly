@@ -16,7 +16,7 @@ async function bootstrap() {
 
   initSocket(server);
 
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server listening on port ${PORT}`);
   });
 }

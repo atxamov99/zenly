@@ -3,6 +3,21 @@ const express = require("express");
 const Friendship = require("../models/Friendship");
 const LocationShare = require("../models/LocationShare");
 const User = require("../models/User");
+
+async function ensureMutualLocationShare(userAId, userBId) {
+  await Promise.all([
+    LocationShare.findOneAndUpdate(
+      { owner: userAId, viewer: userBId },
+      { owner: userAId, viewer: userBId, isActive: true, expiresAt: null },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ),
+    LocationShare.findOneAndUpdate(
+      { owner: userBId, viewer: userAId },
+      { owner: userBId, viewer: userAId, isActive: true, expiresAt: null },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ),
+  ]);
+}
 const auth = require("../middleware/auth");
 const { isBlockedEitherWay } = require("../utils/blocking");
 const { canViewerAccessByRule } = require("../utils/visibility");
@@ -209,22 +224,44 @@ router.patch("/:requestId/respond", async (req, res, next) => {
     await friendship.save();
 
     if (action === "accepted") {
-      await createNotification({
-        userId: friendship.requester,
-        type: "friend_request_accepted",
-        title: "Friend request accepted",
-        body: `${req.user.displayName || req.user.username} accepted your friend request`,
-        data: {
-          friendshipId: friendship._id,
-          accepterId: req.user._id
-        }
-      });
+      await Promise.all([
+        createNotification({
+          userId: friendship.requester,
+          type: "friend_request_accepted",
+          title: "Friend request accepted",
+          body: `${req.user.displayName || req.user.username} accepted your friend request`,
+          data: { friendshipId: friendship._id, accepterId: req.user._id }
+        }),
+        ensureMutualLocationShare(req.user._id, friendship.requester),
+      ]);
     }
 
     res.json({
       message: `Friend request ${action}`,
       friendship
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Backfill: ensure location shares exist with all current friends
+router.post("/sync-location-shares", async (req, res, next) => {
+  try {
+    const friendships = await Friendship.find({
+      status: "accepted",
+      $or: [{ requester: req.user._id }, { recipient: req.user._id }]
+    });
+    await Promise.all(
+      friendships.map((f) => {
+        const otherId =
+          f.requester.toString() === req.user._id.toString()
+            ? f.recipient
+            : f.requester;
+        return ensureMutualLocationShare(req.user._id, otherId);
+      })
+    );
+    res.json({ synced: friendships.length });
   } catch (error) {
     next(error);
   }

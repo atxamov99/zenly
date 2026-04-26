@@ -19,6 +19,7 @@ const swaggerSpec = require("./config/swagger");
 
 function createApp() {
   const app = express();
+  app.set("trust proxy", 1);
   const uploadsDir = path.join(__dirname, "..", "uploads");
   const avatarsDir = path.join(uploadsDir, "avatars");
 

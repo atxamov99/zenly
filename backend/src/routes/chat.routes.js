@@ -17,8 +17,16 @@ const {
 const router = express.Router();
 router.use(auth);
 
+function toObjectId(id) {
+  return new mongoose.Types.ObjectId(id.toString());
+}
+
 function sortedPair(a, b) {
-  return [a, b].map((id) => id.toString()).sort();
+  const idA = toObjectId(a);
+  const idB = toObjectId(b);
+  return [idA, idB].sort((x, y) =>
+    x.toString().localeCompare(y.toString())
+  );
 }
 
 async function ensureFriendship(userIdA, userIdB) {
@@ -34,13 +42,24 @@ async function ensureFriendship(userIdA, userIdB) {
 
 async function findOrCreateConversation(userIdA, userIdB) {
   const sorted = sortedPair(userIdA, userIdB);
-  const existing = await Conversation.findOne({ participants: { $all: sorted, $size: 2 } });
+  const query = {
+    isGroup: false,
+    participants: { $all: sorted, $size: 2 }
+  };
+
+  const existing = await Conversation.findOne(query);
   if (existing) return existing;
+
   try {
-    return await Conversation.create({ participants: sorted, unread: {} });
+    const created = await Conversation.create({
+      isGroup: false,
+      participants: sorted,
+      unread: {}
+    });
+    return created;
   } catch (err) {
     if (err.code === 11000) {
-      return Conversation.findOne({ participants: { $all: sorted, $size: 2 } });
+      return await Conversation.findOne(query);
     }
     throw err;
   }
@@ -427,6 +446,9 @@ router.post(
       }
 
       const conversation = await findOrCreateConversation(userId, friendId);
+      if (!conversation) {
+        return res.status(500).json({ message: "Failed to create conversation" });
+      }
       const message = await Message.create({
         conversationId: conversation._id,
         senderId: userId,

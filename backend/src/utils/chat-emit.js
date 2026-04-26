@@ -1,5 +1,8 @@
 // backend/src/utils/chat-emit.js
-const { getIo } = require("../sockets");
+// Lazy getter to avoid circular dependency with sockets/index.js
+function getIo() {
+  return require("../sockets").getIo();
+}
 
 function toRoom(userId) {
   return `user:${userId.toString()}`;
