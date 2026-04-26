@@ -9,7 +9,9 @@ const initSocket = require("./sockets");
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
+  console.log("Connecting to MongoDB...");
   await connectToDatabase();
+  console.log("MongoDB connected. Creating app...");
 
   const app = createApp();
   const server = http.createServer(app);
@@ -22,6 +24,8 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error("Failed to start server", error);
+  console.error("=== STARTUP ERROR ===");
+  console.error(error.message);
+  console.error(error.stack);
   process.exit(1);
 });
