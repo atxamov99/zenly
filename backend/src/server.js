@@ -24,8 +24,8 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error("=== STARTUP ERROR ===");
-  console.error(error.message);
-  console.error(error.stack);
-  process.exit(1);
+  process.stdout.write("=== STARTUP ERROR ===\n");
+  process.stdout.write(String(error.message) + "\n");
+  process.stdout.write(String(error.stack) + "\n");
+  setTimeout(() => process.exit(1), 500);
 });
